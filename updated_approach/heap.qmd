@@ -334,17 +334,274 @@ if __name__ == "__main__":
     print("Output:", result)  # Output: [1, 1, 2, 3, 4, 4, 5, 6]
 ```
 
-### 🧪 Example Walkthrough
-- Initial heap: [(1,l1), (1,l2), (2,l3)]
-- Pop (1,l1) → link to result → l1.next = 4 → push (4,l1.next)
-- Heap: [(1,l2), (2,l3), (4,l1.next)]
-- Pop (1,l2) → link → l2.next = 3 → push (3,l2.next)
-- Heap: [(2,l3), (3,l2.next), (4,l1.next)]
-- Pop (2,l3) → link → l3.next = 6 → push (6,l3.next)
-- Heap: [(3,l2.next), (4,l1.next), (6,l3.next)]
-- Continue until all nodes processed.
+Let's walk through your **LeetCode "Merge k Sorted Lists"** code step by step, explaining how it works and why each part is important.
 
-Final output: `[1,1,2,3,4,4,5,6]` ✅
+---
+
+### 🔍 **Problem Overview**
+You are given `k` sorted linked lists and need to merge them into one sorted linked list.
+
+#### Example Input:
+```python
+lists = [
+    [1, 4, 5],
+    [1, 3, 4],
+    [2, 6]
+]
+```
+
+#### Expected Output:
+```python
+[1, 1, 2, 3, 4, 4, 5, 6]
+```
+
+---
+
+## ✅ Code Walkthrough
+
+### 1. **Define the ListNode Class**
+
+```python
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+```
+
+- This defines a node in a singly-linked list.
+- Each node has a `val` (value) and a `next` pointer to the next node.
+- If `next` is `None`, it’s the end of the list.
+
+> 📌 Example: `ListNode(1, ListNode(4, ListNode(5)))` creates:  
+> `1 → 4 → 5 → None`
+
+---
+
+### 2. **Main Function: `mergeKLists`**
+
+```python
+def mergeKLists(lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+```
+
+- Takes a list of `k` linked lists (`lists`) as input.
+- Returns a single merged sorted linked list.
+
+---
+
+### 3. **Create Dummy Head**
+
+```python
+dummy = ListNode(0)
+current = dummy
+```
+
+- A **dummy head** is used to simplify the logic of building the result list.
+- `dummy` acts as a placeholder so we don’t have to handle edge cases like empty result or setting the first node specially.
+- `current` points to the current end of the result list — we’ll append new nodes here.
+
+> 🎯 Why? Because we can always return `dummy.next`, which skips the dummy node.
+
+---
+
+### 4. **Initialize Min-Heap**
+
+```python
+heap = []
+```
+
+- We'll use a **min-heap** to efficiently get the smallest value among the current heads of all non-empty lists.
+
+> 💡 Heap stores tuples: `(value, node)`  
+> Python’s `heapq` compares the first element of the tuple, then second if needed.
+
+---
+
+### 5. **Push First Nodes into Heap**
+
+```python
+for lst in lists:
+    if lst:
+        heapq.heappush(heap, (lst.val, lst))
+```
+
+- Loop over each list in `lists`.
+- If the list is not empty (`lst` exists), push its **first node** (`lst`) into the heap with its value.
+- So after this loop:
+  - Heap contains: `(1, l1_head)`, `(1, l2_head)`, `(2, l3_head)`
+  - The smallest values are at the top.
+
+> ⚠️ Important: We store the **node**, not just the value, so we can later access `node.next`.
+
+---
+
+### 6. **Main Loop: While Heap Is Not Empty**
+
+```python
+while heap:
+    val, node = heapq.heappop(heap)
+```
+
+- Extract the smallest element from the heap (based on `val`).
+- Now `node` is the next node to add to our result list.
+
+---
+
+### 7. **Link Node to Result List**
+
+```python
+current.next = node
+current = current.next
+```
+
+- Attach the selected node to the end of the result list.
+- Move `current` forward to point to this new node.
+
+> 🔗 After this, `current` tracks where the next node should be added.
+
+---
+
+### 8. **Add Next Node from Same List (if exists)**
+
+```python
+if node.next:
+    heapq.heappush(heap, (node.next.val, node.next))
+```
+
+- If the current node has a `next`, push that next node into the heap.
+- This ensures we keep track of the next available node from the same list.
+
+> 🔁 This maintains the invariant: heap always holds the **current head** of each non-empty list.
+
+---
+
+### 9. **Return Merged List**
+
+```python
+return dummy.next
+```
+
+- Return the real start of the merged list (skip the dummy node).
+
+---
+
+## 🔄 Step-by-Step Execution (Example)
+
+Given:
+```python
+l1 = 1 → 4 → 5
+l2 = 1 → 3 → 4
+l3 = 2 → 6
+```
+
+### Initial State:
+- `heap = [(1, l1), (1, l2), (2, l3)]`
+- `dummy → ?`, `current → dummy`
+
+---
+
+### Iteration 1:
+- Pop `(1, l1)` → add `l1` to result.
+- `l1.next = 4`, so push `(4, l1.next)` into heap.
+- Now heap: `[(1, l2), (2, l3), (4, l1.next)]`
+- Result: `dummy → 1`
+
+---
+
+### Iteration 2:
+- Pop `(1, l2)` → add `l2` to result.
+- `l2.next = 3`, push `(3, l2.next)` into heap.
+- Heap: `[(2, l3), (3, l2.next), (4, l1.next)]`
+- Result: `dummy → 1 → 1`
+
+---
+
+### Iteration 3:
+- Pop `(2, l3)` → add `l3` to result.
+- `l3.next = 6`, push `(6, l3.next)` into heap.
+- Heap: `[(3, l2.next), (4, l1.next), (6, l3.next)]`
+- Result: `... → 2`
+
+---
+
+### Iteration 4:
+- Pop `(3, l2.next)` → add it.
+- `l2.next.next = 4`, push `(4, l2.next.next)`
+- Heap: `[(4, l1.next), (4, l2.next.next), (6, l3.next)]`
+- Result: `... → 3`
+
+---
+
+### Iteration 5:
+- Pop `(4, l1.next)` → add it.
+- `l1.next.next = 5`, push `(5, l1.next.next)`
+- Heap: `[(4, l2.next.next), (5, l1.next.next), (6, l3.next)]`
+- Result: `... → 4`
+
+---
+
+### Iteration 6:
+- Pop `(4, l2.next.next)` → add it.
+- No more next, so nothing pushed.
+- Heap: `[(5, l1.next.next), (6, l3.next)]`
+- Result: `... → 4`
+
+---
+
+### Iteration 7:
+- Pop `(5, l1.next.next)` → add it.
+- No next, so no push.
+- Heap: `[(6, l3.next)]`
+- Result: `... → 5`
+
+---
+
+### Iteration 8:
+- Pop `(6, l3.next)` → add it.
+- Done!
+- Heap is empty.
+
+Final Result:
+```
+1 → 1 → 2 → 3 → 4 → 4 → 5 → 6
+```
+
+✅ Correct!
+
+---
+
+## 🧠 Key Concepts & Optimizations
+
+| Feature | Purpose |
+|-------|--------|
+| **Min-Heap** | Efficiently find the smallest current head across `k` lists in O(log k) time |
+| **Dummy Node** | Avoid special handling for first node |
+| **Heap Stores Nodes** | Allows us to access `.next` and continue traversal |
+| **Time Complexity** | O(N log k), where N = total number of nodes, k = number of lists |
+| **Space Complexity** | O(k) for the heap |
+
+---
+
+## ✅ Final Output
+
+```python
+Output: [1, 1, 2, 3, 4, 4, 5, 6]
+```
+
+This matches the expected result perfectly.
+
+---
+
+## 📝 Summary
+
+Your implementation is **correct, efficient, and well-structured**! It uses the standard optimal approach for merging k sorted linked lists:
+
+> ✅ Use a min-heap to always pick the smallest available node  
+> ✅ Advance only one list at a time  
+> ✅ Build result incrementally using a dummy head
+
+Great job! 👏
+
+Let me know if you'd like a version with comments, visualization, or comparison to other approaches (like divide-and-conquer).
 
 ### ⏱️ Complexity
 - **Time**: O(N log k), where N = total nodes, k = number of lists
@@ -354,208 +611,489 @@ Final output: `[1,1,2,3,4,4,5,6]` ✅
 
 ## 4. [Task Scheduler](https://leetcode.com/problems/task-scheduler/)
 
-### 📝 Problem Summary
-Given a list of tasks (letters) and a cooldown period `n`, schedule tasks to minimize time. Same task cannot run within `n` intervals.
+The **"Task Scheduler"** problem on LeetCode (Problem #621) is a popular algorithm challenge that tests greedy thinking and efficient use of data structures. Below is a detailed editorial-style explanation of the optimal solution.
 
-### 🔍 Pattern
-- **Greedy + Heap**
-- Always pick the **most frequent available task** (use max-heap)
-- Simulate time steps, and manage cooling periods
+---
 
-### ✅ Solution with Inline Comments
+### 🔷 Problem: [Task Scheduler (LeetCode #621)](https://leetcode.com/problems/task-scheduler/)
 
-```python
-import heapq
-from collections import Counter
+**Problem Statement:**
 
-def leastInterval(tasks: List[str], n: int) -> int:
-    # Count frequency of each task
-    count = Counter(tasks)
-    
-    # Max-heap (negative counts)
-    heap = [-freq for freq in count.values()]
-    heapq.heapify(heap)
-    
-    time = 0
-    # Queue to hold tasks that are cooling down
-    cool_queue = []
-    
-    while heap or cool_queue:
-        time += 1
-        
-        # If heap not empty, take most frequent task
-        if heap:
-            # Pop the most frequent task
-            freq = -heapq.heappop(heap)
-            # Reduce frequency by 1
-            freq -= 1
-            if freq > 0:
-                # Schedule it to become available after 'n' intervals
-                cool_queue.append((time + n, freq))
-        
-        # Check if any task in cool-down queue is ready to be reused
-        if cool_queue and cool_queue[0][0] == time:
-            # Release the task back to heap
-            _, freq = cool_queue.pop(0)
-            heapq.heappush(heap, -freq)
-    
-    return time
+You are given a character array `tasks` representing the tasks a CPU needs to do, where each letter represents a different task. Tasks could be done in any order, but each task must be done in an interval of **at least `n` units** (where `n` is the cooling interval). Return the **least number of units of time** the CPU will take to finish all the tasks.
 
-
-# ---- Official LeetCode Example ----
-if __name__ == "__main__":
-    # Example Input: tasks = ["A","A","A","B","B","B"], n = 2
-    tasks = ["A", "A", "A", "B", "B", "B"]
-    n = 2
-    
-    # Call function
-    result = leastInterval(tasks, n)
-    
-    # Expected Output: 8
-    # A _ _ A _ _ A → B _ _ B _ _ B → total 8
-    print("Output:", result)  # Output: 8
+**Example:**
+```
+Input: tasks = ["A","A","A","B","B","B"], n = 2
+Output: 8
+Explanation: 
+A -> B -> idle -> A -> B -> idle -> A -> B
 ```
 
-### 🧪 Example Walkthrough
-- Count: A:3, B:3
-- Heap: [-3, -3] → max-heap
-- Time 1: pop A → A used → push (1+2=3, 2) to cool_queue → heap: [-3]
-- Time 2: heap not empty → pop B → B used → push (2+2=4, 2) → heap: []
-- Time 3: cool_queue[0] = (3,2) → release A → heap: [-2]
-- Time 4: cool_queue[0] = (4,2) → release B → heap: [-2]
-- Time 5: pop A → push (5+2=7,1) → heap: []
-- Time 6: pop B → push (6+2=8,1) → heap: []
-- Time 7: cool_queue[0] = (7,1) → release A → heap: [-1]
-- Time 8: cool_queue[0] = (8,1) → release B → heap: [-1]
-- Time 9: pop B → no more → but heap empty, cool_queue empty → stop?
-Wait — last B at time 8 → released at 8 → used at 8 → then done?
+---
 
-Wait — let’s trace again:
+### 🔍 Key Observations
 
-- T1: A → cool until T3
-- T2: B → cool until T4
-- T3: A ready → A → cool until T5
-- T4: B ready → B → cool until T6
-- T5: A ready → A → done (count=0)
-- T6: B ready → B → done
-- T7: idle
-- T8: idle
+1. The only constraint is that **the same task cannot be scheduled within `n` units of time**.
+2. We can insert **idle cycles** or **other tasks** between two same tasks to satisfy the cooldown.
+3. The goal is to **minimize total time**, so we want to **minimize idle time**.
 
-But we need to finish all tasks → 6 tasks → 8 units?
+---
 
-No — actually, after T6, both A and B are done → so we stop at T6?
+### ✅ Strategy: Greedy with Math Insight
 
-Wait — no: A was used at T1, T3, T5 → three times → done
-B used at T2, T4, T6 → done
+We can solve this using a **greedy approach**:
 
-So total time = 6?
+1. **Count frequency** of each task.
+2. Find the task with **maximum frequency**, say `maxFreq`.
+3. There will be `(maxFreq - 1)` full **blocks** of size `(n + 1)` between the most frequent task.
+   - For example, if `maxFreq = 3` and `n = 2`, we have:
+     ```
+     A _ _ A _ _ A
+     ```
+     → 2 gaps of size 2 → total block size = 3 per segment → 2 full segments of length (n+1) = 3
+4. Then, we **fill other tasks** into these gaps.
+5. Finally, **add the remaining tasks** that occur with the same max frequency.
 
-But expected is 8.
+---
 
-Ah — I see: the example says:
+### 📌 Formula
 
-> A _ _ A _ _ A → B _ _ B _ _ B → total 8
+Let:
+- `maxFreq` = maximum frequency among tasks
+- `countMaxFreq` = number of tasks that have frequency = `maxFreq`
 
-But that uses 8 slots.
+Then, the **minimum time** required is:
 
-Wait — we must **wait until cooldown ends before reusing**.
+```
+result = max(
+    (maxFreq - 1) * (n + 1) + countMaxFreq,
+    total_tasks
+)
+```
 
-But we can interleave.
+#### Why this formula?
 
-Correct sequence:
-- T1: A
-- T2: B
-- T3: idle (A and B both cooling)
-- T4: A (A cooled after T3 → available at T4?)
-Wait: cooldown is 2 → means after running A at T1, next A can run at T4 (T1+3)
+- `(maxFreq - 1) * (n + 1)` → number of slots taken by the most frequent task and its required cooldown.
+- `+ countMaxFreq` → the last occurrence of each task with max frequency comes after the last gap.
+- But if there are **so many different tasks** that they fill all idle slots, the total time is just `len(tasks)`.
 
-Yes: cooldown n = 2 → means gap of 2 between two same tasks → so interval between runs is 3.
+So we take the **maximum** of the two to ensure we don't underestimate.
+
+---
+
+### 🧠 Example Walkthrough
+
+**Input:** `tasks = ["A","A","A","B","B","B"], n = 2`
+
+- Frequencies: A → 3, B → 3
+- `maxFreq = 3`, `countMaxFreq = 2` (both A and B appear 3 times)
+- Total tasks = 6
+
+Compute:
+```
+(3 - 1) * (2 + 1) + 2 = 2 * 3 + 2 = 6 + 2 = 8
+```
+Compare with total tasks: `max(8, 6) = 8`
+
+✅ Output: `8`
+
+---
+
+### ✅ Code (Python)
+
+```python
+from collections import Counter
+
+class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        freq = Counter(tasks)
+        maxFreq = max(freq.values())
+        countMaxFreq = sum(1 for f in freq.values() if f == maxFreq)
+        
+        result = (maxFreq - 1) * (n + 1) + countMaxFreq
+        return max(result, len(tasks))
+```
+Absolutely! Let’s walk through the **mathematical solution** to the **Task Scheduler (LeetCode #621)** with a **detailed, step-by-step example** to build deep intuition.
+
+---
+
+### 🧩 Problem Recap
+
+**Goal**: Find the **minimum time** to execute all tasks, given that:
+- Each task is a letter (e.g., `'A'`, `'B'`).
+- The same task must wait at least `n` units between executions.
+- You can interleave other tasks or insert **idle** slots.
+
+---
+
+### ✅ Mathematical Formula (Recap)
+
+The answer is:
+
+```text
+result = max(
+    (maxFreq - 1) * (n + 1) + countMaxFreq,
+    total_tasks
+)
+```
+
+Where:
+- `maxFreq` = highest frequency of any task
+- `countMaxFreq` = number of tasks that have frequency = `maxFreq`
+- `total_tasks` = length of the `tasks` array
+
+---
+
+### 🎯 Example 1: Classic Case
+
+**Input**:  
+`tasks = ["A","A","A","B","B","B"]`  
+`n = 2`
+
+---
+
+### 🔍 Step 1: Count Frequencies
+
+| Task | Count |
+|------|-------|
+| A    | 3     |
+| B    | 3     |
 
 So:
-- A at T1 → next A at T4
-- B at T2 → next B at T5
-- A at T4 → next A at T7
-- B at T5 → next B at T8
+- `maxFreq = 3` → A and B both appear 3 times
+- `countMaxFreq = 2` → two tasks (A and B) have max frequency
+- `total_tasks = 6`
 
-So:
-- T1: A
-- T2: B
-- T3: idle
-- T4: A
-- T5: B
-- T6: idle
-- T7: A
-- T8: B
+---
 
-Total time: 8 ✅
+### 🔧 Step 2: Apply the Formula
 
-Our code:
-- T1: A → cool until T4
-- T2: B → cool until T5
-- T3: nothing → cool_queue not ready
-- T4: A ready → use A → cool until T7
-- T5: B ready → use B → cool until T8
-- T6: idle
-- T7: A ready → use A → count=0
-- T8: B ready → use B → count=0
-→ time = 8 ✅
+We compute the **minimum required time due to the most frequent tasks**:
 
-Correct.
+```text
+(maxFreq - 1) * (n + 1) + countMaxFreq
+= (3 - 1) * (2 + 1) + 2
+= 2 * 3 + 2
+= 6 + 2
+= 8
+```
 
-### ⏱️ Complexity
-- **Time**: O(N * log k), where N = total tasks, k = unique tasks
-- **Space**: O(k) — heap and queue
+Now compare with total number of tasks:
+
+```text
+max(8, 6) = 8
+```
+
+✅ **Answer = 8**
+
+---
+
+### 🖼️ Visual Schedule
+
+We schedule the most frequent tasks first (A and B), spaced at least `n=2` apart.
+
+We start with A:
+
+```
+A _ _ A _ _ A
+```
+
+Each `A` is 3 units apart → satisfies `n=2` cooldown.
+
+Now fill in `B` into the gaps:
+
+```
+A B _ A B _ A B
+```
+
+We used both B’s in the gaps. Final B at the end.
+
+No idle time left? Actually, we had to insert idle initially, but B filled most slots.
+
+But wait — we still have:
+
+```
+Time:  1   2   3   4   5   6   7   8
+      [A] [B] [idle] [A] [B] [idle] [A] [B]
+```
+
+Wait — actually, we can do better:
+
+```
+1: A
+2: B
+3: idle
+4: A
+5: B
+6: idle
+7: A
+8: B
+```
+
+Yes → 8 units.
+
+We **can’t do better** because A needs to run 3 times with 2 gaps of at least 2 → forces structure.
+
+So **8 is optimal**.
+
+---
+
+### 🎯 Example 2: Many Unique Tasks (No Idle Needed)
+
+**Input**:  
+`tasks = ["A","A","B","B","C","C"]`  
+`n = 2`
+
+- Frequencies: A:2, B:2, C:2
+- `maxFreq = 2`
+- `countMaxFreq = 3` (A, B, C all appear 2 times)
+- `total_tasks = 6`
+
+Apply formula:
+
+```text
+(2 - 1) * (2 + 1) + 3 = 1 * 3 + 3 = 6
+max(6, 6) = 6
+```
+
+✅ Answer = 6
+
+---
+
+### 🖼️ Schedule:
+
+We can do:
+
+```
+A B C A B C
+```
+
+Each task appears twice, separated by 2 other tasks → satisfies `n=2`.
+
+No idle needed! The **gaps are fully filled** by other tasks.
+
+So total time = 6.
+
+💡 This shows: when other tasks can **fill the gaps**, we don’t need idle time.
+
+---
+
+### 🎯 Example 3: One Very Frequent Task
+
+**Input**:  
+`tasks = ["A","A","A","A","A","A","B","C","D","E"]`  
+`n = 2`
+
+- A:6, B:1, C:1, D:1, E:1
+- `maxFreq = 6` (A)
+- `countMaxFreq = 1` (only A has frequency 6)
+- `total_tasks = 10`
+
+Compute:
+
+```text
+(6 - 1) * (2 + 1) + 1 = 5 * 3 + 1 = 15 + 1 = 16
+max(16, 10) = 16
+```
+
+✅ Answer = 16
+
+---
+
+### 🖼️ Why 16?
+
+We must schedule A like this:
+
+```
+A _ _ A _ _ A _ _ A _ _ A _ _ A
+```
+
+- 5 gaps between 6 A’s
+- Each gap is 3 units long (`n+1 = 3`)
+- Total so far: `5*3 + 1` (last A) → but wait, structure is:
+
+```
+[A _ _] [A _ _] [A _ _] [A _ _] [A _ _] [A]
+```
+
+→ 5 full blocks of size 3 → 15, plus last A → but it's already included.
+
+Actually, total length = `(maxFreq - 1) * (n + 1) + 1` = `5*3 + 1 = 16`
+
+Now, we can fill B, C, D, E into the gaps.
+
+Each gap has 2 empty slots → 5 gaps × 2 = 10 idle spots.
+
+We only have 5 other tasks → we can place them, but still have idle time.
+
+So minimum time is **16**, even though only 10 tasks.
+
+We **can’t compress** A’s schedule.
+
+---
+
+### 🎯 Example 4: n = 0 (No Cooldown)
+
+**Input**:  
+`tasks = ["A","A","B","B"]`, `n = 0`
+
+- `maxFreq = 2`, `countMaxFreq = 2`, `total_tasks = 4`
+
+Formula:
+
+```text
+(2 - 1)*(0 + 1) + 2 = 1*1 + 2 = 3
+max(3, 4) = 4
+```
+
+✅ Answer = 4
+
+---
+
+### 🖼️ Schedule: `A B A B` → no idle needed, `n=0` means no wait.
+
+So total time = 4 → matches.
+
+💡 This shows why we take `max(..., total_tasks)` — you can’t finish faster than the number of tasks.
+
+---
+
+### 🎯 Example 5: All Same Task
+
+**Input**: `tasks = ["A","A","A"]`, `n = 1`
+
+- `maxFreq = 3`, `countMaxFreq = 1`, `total_tasks = 3`
+
+```text
+(3 - 1)*(1 + 1) + 1 = 2*2 + 1 = 5
+max(5, 3) = 5
+```
+
+✅ Answer = 5
+
+---
+
+### 🖼️ Schedule:
+
+```
+A _ A _ A
+```
+
+Time: 1 (A), 2 (idle), 3 (A), 4 (idle), 5 (A)
+
+→ 5 units.
+
+Perfect.
+
+---
+
+### 🔑 Key Insight Summary
+
+| Term | Meaning |
+|------|--------|
+| `(maxFreq - 1)` | Number of **full gaps** between the most frequent task |
+| `(n + 1)` | Each gap + task needs at least `n+1` time (1 for task, n for cooldown) |
+| `+ countMaxFreq` | The **last occurrence** of each max-frequency task goes at the end |
+| `max(..., total_tasks)` | Can't take less time than total number of tasks |
+
+---
+
+### ✅ When Does Each Term Win?
+
+| Case | Which term wins? |
+|------|------------------|
+| Few unique tasks, high `n` | `(maxFreq-1)*(n+1)+...` → idle-heavy |
+| Many unique tasks | `total_tasks` → no idle, fully packed |
+| `n = 0` | Always `total_tasks` |
+| One dominant task | Formula term wins |
+
+---
+
+### 🏁 Final Thoughts
+
+The **mathematical solution** works because:
+
+> 🔹 The **most frequent task** dictates the **minimum skeleton** of the schedule.  
+> 🔹 Other tasks either **fill the gaps** or extend the time.  
+> 🔹 If they fill everything, total tasks wins. Otherwise, the structure wins.
+
+You don’t need to simulate — just compute the **tightest possible schedule** around the bottleneck task.
+
+---
+
+Let me know if you'd like a **diagram version** or a **whiteboard-style explanation**!
+---
+
+### ⏱️ Complexity Analysis
+
+- **Time:** O(m), where `m = len(tasks)` — for counting frequencies.
+- **Space:** O(1) — since there are at most 26 unique tasks (uppercase letters), the `Counter` uses constant space.
+
+---
+
+### 💡 Why Greedy Works?
+
+We always want to **schedule the most frequent tasks first** to avoid having them pile up at the end, which would require more idle time. By structuring around the most frequent task, we create a framework that minimizes idle slots.
+
+Even if we interleave other tasks optimally, the **bottleneck** is the most frequent task and its cooldown requirement.
+
+---
+
+### ✅ Edge Cases
+
+- `n = 0`: No cooldown → answer is `len(tasks)`
+- All tasks are the same: `["A","A"], n=1` → `A idle A` → 3
+- Many distinct tasks: If `n=1`, tasks = [A,B,C,D,E], then no idle needed → answer = 5
+
+---
+
+### 🔚 Conclusion
+
+The key insight is **not simulating** the schedule, but using **mathematical reasoning** to compute the minimum required time.
+
+> **Answer = max( (maxFreq - 1) * (n + 1) + countMaxFreq , total_tasks )**
+
+This elegant solution runs in linear time and is optimal.
+
+---
+
+Let me know if you'd like a **simulation-based approach** (using heap or queue) as an alternative method!
 
 ---
 
 ## 5. [Top K Frequent Words](https://leetcode.com/problems/top-k-frequent-words/)
 
-### 📝 Problem Summary
-Return the `k` most frequent words. If tied, sort lexicographically (ascending).
 
-### 🔍 Pattern
-- **HashMap + Heap + Sorting**
-- Use max-heap with custom comparator: higher freq first, then lex smaller
+### 🧩 Problem :
+We want to find the `k` most frequent words in a list, with ties broken by **lexicographical (dictionary) order**.
 
-### ✅ Solution with Inline Comments
+```
+words = ["the","day","is","sunny","the","the","the","sunny","is","is"]
+k = 4
+print(topKFrequent(words, k))  
+# Output: ["the", "is", "sunny", "day"]
+```
+### ✅Solution (Python):
 
 ```python
 import heapq
 from collections import Counter
-from typing import List
 
-def topKFrequent(words: List[str], k: int) -> List[str]:
-    # Count frequency of each word
+def topKFrequent(words, k):
+    # Step 1: Count frequency of each word
     count = Counter(words)
     
-    # Use min-heap to keep k most frequent words
-    # Store (-freq, word) so that:
-    # - Higher freq comes first (via negative)
-    # - Lexicographically smaller word comes first if freq equal
-    heap = []
+    # Step 2: Create a min-heap (or use negative frequency for max behavior)
+    heap = [(-freq, word) for word, freq in count.items()]
+    heapq.heapify(heap)
     
-    for word, freq in count.items():
-        # Push (-freq, word) to simulate max-heap on freq, then min-heap on word
-        heapq.heappush(heap, (-freq, word))
-        
-        # If more than k elements, pop the smallest (least frequent or lexicographically larger)
-        if len(heap) > k:
-            heapq.heappop(heap)
-    
-    # Extract results in reverse order (since we want top k)
-    # But since we want lexicographic order when tied, and heap orders correctly,
-    # we just extract and reverse to get descending freq order
-    result = []
-    while heap:
-        result.append(heapq.heappop(heap)[1])  # word
-    
-    # Reverse to get descending frequency order
-    return result[::-1]
+    # Step 3: Pop the top k elements
+    return [heapq.heappop(heap)[1] for _ in range(k)]
 
 
 # ---- Official LeetCode Example ----
 if __name__ == "__main__":
-    # Example Input: words = ["i","love","leetcode","i","love","coding"], k = 2
+    # Example Input: words = ["i","love","leetcode","i","love","coding"],k = 2
     words = ["i", "love", "leetcode", "i", "love", "coding"]
     k = 2
     
@@ -563,320 +1101,163 @@ if __name__ == "__main__":
     result = topKFrequent(words, k)
     
     # Expected Output: ["i","love"]
-    # i:2, love:2, coding:1 → top 2 → i and love (tie broken by lex order: i < love)
+    # i:2, love:2, coding:1 → top 2 → i and 
+    # love (tie broken by lex order: i < love)
     print("Output:", result)  # Output: ['i', 'love']
 ```
 
+
+### 🔍 Step-by-Step Breakdown
+
+### 🟩 Step 1: Count Frequencies
+```python
+count = Counter(words)
+```
+
+- `Counter` is a subclass of `dict` that counts occurrences.
+- Example:  
+  ```python
+  words = ["i","love","leetcode","i","love","coding"]
+  count = Counter(words)
+  # count = {'i': 2, 'love': 2, 'leetcode': 1, 'coding': 1}
+  ```
+
+---
+
+### 🟩 Step 2: Build a List for the Heap
+```python
+heap = [(-freq, word) for word, freq in count.items()]
+```
+
+- We create a list of tuples: `(-frequency, word)`
+- We use **negative frequency** because:
+  - Python’s `heapq` is a **min-heap** by default.
+  - To simulate a **max-heap** for frequency, we negate the frequency.
+  - So higher actual frequency becomes more negative → smaller in min-heap → comes out first.
+
+#### Example:
+From our `count`, this gives:
+```python
+[(-2, 'i'), (-2, 'love'), (-1, 'leetcode'), (-1, 'coding')]
+```
+
+Now, when we heapify, the **smallest tuple** (by first element, then second) will be at the top.
+
+But here's the **key insight**:  
+When two frequencies are the same (e.g., `-2`), Python compares the **second element**, which is the word.
+
+So:
+- `(-2, 'i')` vs `(-2, 'love')` → `'i' < 'love'` lexicographically → `(-2, 'i')` is smaller.
+- But we want **higher frequency first**, and **lexicographically smaller word first** in the result.
+
+Wait — doesn't that mean `'i'` should come before `'love'`? ✅ Yes.
+
+But in the heap, since `(-2, 'i')` is smaller than `(-2, 'love')`, it will be **popped first** — which is exactly what we want.
+
+✅ So the tuple `(-freq, word)` naturally gives us:
+- Higher frequency first (because of `-freq`)
+- Lexicographically smaller word first in case of tie
+
+> This is why the tuple ordering works perfectly.
+
+---
+
+### 🟩 Step 3: Heapify the List
+```python
+heapq.heapify(heap)
+```
+
+- Converts the list into a **min-heap** in-place.
+- The smallest element (i.e., highest frequency, then lexicographically smallest) is at the top.
+
+After heapify, the internal structure maintains heap property:
+- `heap[0]` is always the smallest (i.e., the "best" candidate).
+
+But note: The entire list is **not sorted** — just heap-ordered.
+
+---
+
+### 🟩 Step 4: Extract Top k Elements
+```python
+return [heapq.heappop(heap)[1] for _ in range(k)]
+```
+
+- We pop `k` times.
+- Each `heappop()` removes and returns the smallest (i.e., most frequent, or lexicographically smaller) element.
+- We take `[1]` → the **word** part of the tuple `(-freq, word)`.
+
+Each pop takes **O(log n)** time, so k pops → **O(k log n)**.
+
+---
+
 ### 🧪 Example Walkthrough
-- Count: i:2, love:2, coding:1
-- Push (-2, 'i') → heap = [(-2,'i')]
-- Push (-2, 'love') → heap = [(-2,'i'), (-2,'love')] → now size=2
-- Push (-1, 'coding') → size=3 → pop smallest: (-2,'love')? Wait — how does heap compare?
 
-Python compares tuples: (-2,'i') vs (-2,'love') → second element: 'i' < 'love' → so (-2,'i') < (-2,'love') → so (-2,'i') is smaller → popped first?
-
-Wait — we want to keep the **most frequent** and **lex smallest**.
-
-But we’re using a **min-heap** to store k elements.
-
-We push (-2,'i'), (-2,'love'), (-1,'coding')
-
-Heap: [(-2,'i'), (-2,'love'), (-1,'coding')] → min is (-2,'i')? No — (-2,'i') vs (-2,'love'): 'i' < 'love' → so (-2,'i') is smaller → will be popped first if size > k.
-
-But we want to keep the **best** k.
-
-So when we have 3 items and remove one, we remove the **worst** — which is the one with smallest frequency OR lexicographically largest?
-
-But we want to keep the best.
-
-So we should **remove the worst**, i.e., smallest in heap order.
-
-But (-2,'i') is smaller than (-2,'love') → so it gets removed → bad.
-
-We want to **keep** the better ones.
-
-So we need to **reverse the ordering**.
-
-Better approach: use **max-heap** idea, but we can’t. Instead, use **min-heap of size k**, and push `(-freq, word)` — but then when comparing, we want:
-- Higher freq → better
-- Lower word → better
-
-So in tuple: `(-freq, word)` → higher freq → more negative → smaller value → lower in min-heap → so it stays longer.
-
-But when two have same freq: `-freq` same → compare `word`: lexicographically smaller word → smaller tuple → so it goes to front → gets popped first.
-
-But we want to **keep** the better ones.
-
-So when we have more than k, we **pop the worst**, which is the **smallest** in the heap.
-
-So if we have:
-- (-2,'i')
-- (-2,'love')
-- (-1,'coding')
-
-The smallest is (-2,'i') → because 'i' < 'love' → so we pop 'i' → wrong!
-
-We want to keep 'i' and 'love', not lose 'i'.
-
-So we need to **invert the word order**.
-
-Solution: use `(-freq, word)` → but we want **lexicographically larger** to be worse.
-
-But we want to keep the **smaller** word.
-
-So we need to make the **worse** item be smaller in the heap.
-
-Idea: use `(-freq, word)` → but when freq same, we want **larger word** to be worse → so put **smaller word** in front → so we **don’t** want to pop it.
-
-But in min-heap, smaller comes first.
-
-So if we have:
-- (-2,'i') → good
-- (-2,'love') → bad (lex larger)
-
-We want to **keep** 'i', **remove** 'love'
-
-But 'i' < 'love' → so (-2,'i') < (-2,'love') → so (-2,'i') is smaller → will be popped first → bad.
-
-So we need to **reverse the word order**.
-
-Use `(-freq, -ord(word))`? No — strings.
-
-Better: use `(-freq, word)` but **reverse the word comparison**.
-
-Standard trick: use `(-freq, word)` → but **when freq equal, we want larger word to be considered smaller** so it gets popped.
-
-So: use `(-freq, word)` → but negate the word? Can't.
-
-Alternative: use `(-freq, word)` and when popping, we remove the smallest — which is the worst.
-
-But we want the **worst** to be the one with:
-- lowest freq
-- or same freq but lexicographically largest
-
-So we need to make **larger word** appear earlier in the heap.
-
-So use `(-freq, word)` → but **reverse the string comparison**.
-
-We can do: `(-freq, word)` → but if freq same, we want **larger word** to be **smaller** in heap.
-
-So use `(-freq, word)` → but **negate the word**? Not possible.
-
-Instead, use `(-freq, word)` and accept that it works **only if we reverse the order at end**.
-
-But standard solution uses:
+Let’s run through:
 
 ```python
-heapq.heappush(heap, (-freq, word))
+words = ["i","love","leetcode","i","love","coding"]
+k = 2
 ```
 
-And it works because when two have same freq, the lexicographically smaller word comes first in the heap → so it gets popped first → bad.
-
-So the correct way is to use **max-heap** semantics.
-
-Actually, the accepted solution uses:
-
+#### Step 1: Count
 ```python
-heapq.heappush(heap, (-freq, word))
+count = {'i': 2, 'love': 2, 'leetcode': 1, 'coding': 1}
 ```
 
-and then at the end, reverse.
-
-But that doesn't fix the issue.
-
-Wait — no: the **problem** is that when we have two items with same freq, we want to **keep the lexicographically smaller** one.
-
-So we want to **remove the lexicographically larger** one.
-
-So we need the **larger word** to be **smaller** in the heap so it gets popped.
-
-So use `(-freq, word)` → but **reverse the word order**.
-
-So use `(-freq, -ord(word[0]))`? No — multiple letters.
-
-Better: use `(-freq, word)` → but **reverse the word** for comparison?
-
-No.
-
-Standard trick: use `(-freq, word)` → but **when freq equal, sort by reverse lex order**.
-
-So use `(-freq, word)` → but **reverse the word**? Not helpful.
-
-Actually, the **correct way** is to use `(-freq, word)` → and then **when popping, we remove the smallest**.
-
-But we want to **remove the worst**, which is the one with:
-- lower freq
-- or same freq but larger word
-
-So we want `(-freq, word)` to be ordered such that:
-- Higher freq → better
-- Same freq → smaller word → better
-
-So in tuple: `(-freq, word)` → higher freq → more negative → smaller value → better → stays
-Same freq: smaller word → smaller value → better → stays
-
-So the **worst** is the one with:
-- smallest `-freq` (i.e., highest freq?) → no
-
-Wait: no — `(-freq, word)` → if freq=2 → -2; freq=1 → -1 → so -2 < -1 → so (-2, ...) < (-1, ...)
-
-So (-2, 'i') < (-1, 'love') → so lower freq wins? No — higher freq is better.
-
-So in min-heap, (-2, 'i') < (-1, 'love') → so (-2, 'i') is smaller → gets popped first → bad.
-
-So we want **higher freq** to be **less likely to be popped**.
-
-So we need **higher freq** to be **larger** in the heap.
-
-So use `(freq, word)` with max-heap → but we can’t.
-
-So use `(-freq, word)` → but then we want **same freq** to have **larger word** be worse → so we want **larger word** to be **smaller** in heap.
-
-So we can use `(-freq, word)` and then **reverse the word** for comparison.
-
-But Python doesn't allow that.
-
-Best solution: use `(-freq, word)` and **sort the result** at the end.
-
-But that defeats the purpose.
-
-Actually, the **correct and standard way** is:
-
+#### Step 2: Build heap list
 ```python
-heapq.heappush(heap, (-freq, word))
+heap = [(-2, 'i'), (-2, 'love'), (-1, 'leetcode'), (-1, 'coding')]
 ```
 
-and then **after popping**, reverse the list.
+#### Step 3: heapify
+After `heapify`, the heap is reordered so that:
+- `(-2, 'i')` is at the top (smallest), because `'i' < 'love'` lexicographically.
 
-But that doesn't help.
+So the heap order ensures:
+1. `(-2, 'i')`
+2. `(-2, 'love')`
+3. `(-1, ...)` etc.
 
-Wait — the real solution is to **not** rely on heap order for tie-breaking.
+#### Step 4: Pop k=2 times
 
-Instead, use a **list** and sort at the end.
+- **1st pop**: `(-2, 'i')` → append `'i'`
+- **2nd pop**: `(-2, 'love')` → append `'love'`
 
-But that’s O(k log k).
+✅ Result: `["i", "love"]`
 
-Actually, the **accepted solution** is:
+#### ⚠️ Why Doesn’t Lex Order Mess It Up?
 
+Suppose we had:
 ```python
-return [word for freq, word in sorted(count.items(), key=lambda x: (-x[1], x[0]))[:k]]
+words = ["love", "i", "i", "love"]  # same frequencies
 ```
 
-But that’s sorting, not heap.
+Then:
+- `(-2, 'i')` and `(-2, 'love')`
+- `'i' < 'love'` → so `(-2, 'i')` is smaller → popped first → correct.
 
-For heap version, we can do:
-
-```python
-heap = []
-for word, freq in count.items():
-    heapq.heappush(heap, (-freq, word))
-    if len(heap) > k:
-        heapq.heappop(heap)
-return [word for _, word in sorted(heap)]
-```
-
-But that’s O(k log k).
-
-Alternatively, use `(-freq, word)` and it works because the heap will eventually have the k best, and when you pop, you get them in order.
-
-But due to the tie-breaking, it might not work.
-
-Actually, the **correct way** is to use `(-freq, word)` and it **does work** because:
-
-- When two have same freq, the lexicographically smaller word has smaller `word` → so `(-freq, word)` is smaller → so it will be popped first if we exceed k.
-
-But we want to **keep** the smaller word.
-
-So we need to **reverse** the word order.
-
-So use `(-freq, word)` → but **reverse the word**? Not possible.
-
-Best workaround: use `(-freq, word)` and **when pushing, invert the word comparison**.
-
-So use `(-freq, word)` → but **reverse the string**? No.
-
-Or use `(-freq, word)` and **when comparing, use reversed word**.
-
-But Python doesn't allow custom comparisons easily.
-
-So the **standard solution** is to use sorting at the end.
-
-But for interview, they expect the heap version with proper tie-breaking.
-
-So use: `(-freq, word)` → but **in case of tie, we want larger word to be worse** → so make it smaller in heap.
-
-So use `(-freq, word)` → but **reverse the word** → `(-freq, word[::-1])`? No — not correct.
-
-Actually, the **correct and accepted way** is to use `(-freq, word)` and it works because the **heap maintains the k best**, and when you pop, you get the worst.
-
-But due to the nature of min-heap, it pops the smallest, which is the worst.
-
-And the worst is defined as: lower freq or same freq but larger word.
-
-But with `(-freq, word)`, the smallest is:
-- lowest `-freq` → highest freq → so high freq is small → so it won't be popped
-- same `-freq`: smallest `word` → so small word is small → so it won't be popped
-
-So the **large word** is bigger → so it gets popped first.
-
-Yes! So if two have same freq, the lexicographically larger word is bigger in the tuple → so it gets popped first.
-
-Perfect.
-
-So in our example:
-- (-2, 'i') → small
-- (-2, 'love') → large
-- So (-2, 'love') > (-2, 'i') → so (-2, 'i') is smaller → stays
-- So when we have 3 items, we pop the largest → which is (-2, 'love') → good.
-
-So we **keep 'i'**.
-
-Yes!
-
-So the code is correct.
-
-### ⏱️ Complexity
-- **Time**: O(N + N log k) — building counter, heap ops
-- **Space**: O(N) — count and heap
+So **the natural tuple comparison handles the tie-break correctly**.
 
 ---
 
-✅ **Chunk 1 Complete**
+#### ⏱️ Time & Space Complexity
 
-Would you like me to continue with **Chunk 2 (Problems 6–7)**?  
-👉 Just say **"continue?"**
+| Aspect | Complexity |
+|------|------------|
+| **Time** | O(n + k log n) <br> - O(n) for counting <br> - O(n) for heapify <br> - O(k log n) for popping k times |
+| **Space** | O(n) for counter and heap |
 
+---
 
-Great! Let's proceed with **Chunk 2: Problems 6–7** from your list.
+#### ✅ Final Notes
+
+- The **tuple `(-freq, word)`** is the magic key.
+- Python’s **lexicographic comparison of strings in tuples** makes tie-breaking automatic.
+- `heapq` only supports min-heap, so we **negate frequency** to simulate max behavior.
 
 ---
 
-## 🔹 Pattern: Binary Search on Answer + Two Pointers / Heap
-
-### 📌 How to Recognize
-- You're asked to find the **kth smallest/largest**, **closest**, or **minimum/maximum** value under a condition.
-- The answer can be **searched in a sorted range** (e.g., distance, time, value).
-- A function exists that can **verify** whether a candidate answer is valid (`can_satisfy(x)`).
-- Often paired with **two pointers** (for ordered arrays) or **sliding window** for range constraints.
-
-### 📌 Step-by-Step Thinking Process (Template)
-1. **Identify the search space**: e.g., `low = min_value`, `high = max_value`.
-2. **Define a validation function**: `valid(mid)` → returns True if `mid` is feasible.
-3. **Binary search**:
-   - While `low < high`:
-     - `mid = (low + high) // 2`
-     - If `valid(mid)`: `high = mid` (we want smaller or equal)
-     - Else: `low = mid + 1`
-4. **Return `low`** as the minimal feasible answer.
-5. **Use two pointers or sliding window** when dealing with ranges in sorted arrays.
-
-### 📌 Common Pitfalls & Edge Cases
-- Incorrect bounds: e.g., `high = len(arr)` instead of `max_val`.
-- Not handling duplicates properly in binary search (e.g., kth element).
-- Forgetting to **sort input** before using two pointers.
-- Off-by-one errors in `mid` calculation (use `(low + high) // 2` safely).
-
----
+Let me know if you'd like to see the **bucket sort** version (O(n) time) too!
 
 ## 6. [Find K Closest Elements](https://leetcode.com/problems/find-k-closest-elements/)
 
