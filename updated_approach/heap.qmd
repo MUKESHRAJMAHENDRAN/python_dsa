@@ -48,7 +48,8 @@ from typing import List, Tuple
 
 def kClosest(points: List[List[int]], k: int) -> List[List[int]]:
     # Use a max-heap to store the k closest points
-    # We store (-distance, point) so that the farthest (largest distance) is at top
+    # We store (-distance, point) so that the farthest 
+    # (largest distance) is at top
     # Negative distance ensures we simulate max-heap behavior using min-heap
     heap = []
     
@@ -59,7 +60,7 @@ def kClosest(points: List[List[int]], k: int) -> List[List[int]]:
         # If heap has fewer than k elements, add current point
         if len(heap) < k:
             heapq.heappush(heap, (-dist, [x, y]))
-        # Else, if current point is closer than the farthest in heap, replace it
+        # Else,if current point is closer than the farthest in heap,replace it
         elif dist < -heap[0][0]:  # -heap[0][0] is the max distance in heap
             heapq.heappop(heap)
             heapq.heappush(heap, (-dist, [x, y]))
@@ -158,51 +159,101 @@ if __name__ == "__main__":
 ```
 
 ### 🧪 Example Walkthrough
-- Add 1: small = [-1], large = [] → size diff = 1 → valid
-- Add 2: push to small → small = [-2,-1], then compare: 2 > 1 → move 2 to large → small = [-1], large = [2]
-- Find median: equal size → (1 + 2)/2 = 1.5
-- Add 3: push to small → small = [-3,-1], compare: 3 > 2 → move 3 to large → small = [-1], large = [2,3]
-- Now sizes: 1 vs 2 → balance: move 2 back to small → small = [-2,-1], large = [3]
-- Median: larger heap has more → return 3? Wait! Wrong.
 
-Wait — correction: After adding 3:
-- small = [-3,-1] → top is -3 → value 3
-- large = [2] → top is 2
-- 3 > 2 → so we pop 3 from small and push to large → small = [-1], large = [2,3]
-- Sizes: 1 vs 2 → imbalance → pop large (2), push to small as -2 → small = [-2,-1], large = [3]
+We'll go through this sequence:
 
-Now median: large has more → return 3? No!
+```python
+mf = MedianFinder()
+mf.addNum(1)
+mf.addNum(2)
+print(mf.findMedian())  # 1.5
+mf.addNum(3)
+print(mf.findMedian())  # 2.0
+```
 
-Wait — let’s recheck logic:
+#### Step 1: `addNum(1)`
 
-Actually, after adding 3:
-- Push 3 to small → small = [-3,-1], large = [2]
-- Compare: -small[0] = 3 > large[0] = 2 → so move 3 to large → small = [-1], large = [2,3]
-- Now len(small)=1, len(large)=2 → imbalance → pop large[0]=2 → push -2 to small → small = [-2,-1], large = [3]
-- Now balanced: sizes differ by 1 → correct
+- Push `-1` into `small` → `small = [-1]`, `large = []`
+- No need to compare since `large` is empty.
+- Size check:
+  - `len(small) = 1`, `len(large) = 0` → difference is 1 → acceptable.
 
-Median: large has more → return large[0] = 3? But expected is 2.
+✅ Final state:
+- `small = [-1]` (i.e., contains 1)
+- `large = []`
 
-Ah — here’s the bug in our walkthrough.
+---
 
-But wait: sorted stream is [1,2,3] → median is 2.
+#### Step 2: `addNum(2)`
 
-So why do we have large=[3]? That can’t be.
+- Push `-2` into `small` → `small = [-2, -1]` (min-heap of negatives → top is -2 → actual value is 2)
+- Now check: is `top(small)` > `top(large)`?
+  - But `large` is still empty → skip comparison.
+- Balance sizes:
+  - `len(small) = 2`, `len(large) = 0` → difference is 2 (>1), so move one element.
+  - Pop from `small`: `val = -heapq.heappop(self.small)` → pop `-2`, so `val = 2`
+  - Push `2` into `large`: `large = [2]`
+  - Now `small = [-1]`, `large = [2]`
 
-Let’s fix the logic:
+✅ Final state:
+- `small = [-1]` → {1}
+- `large = [2]` → {2}
 
-After adding 3:
-- small = [-1] → contains 1
-- large = [2,3] → contains 2,3
-- Then we check: len(large) > len(small)+1 → 2 > 1+1 → 2 > 2? No → false → don't rebalance
+Now both heaps differ in size by only 1 → good.
 
-So no pop.
+---
 
-Then median: large has more → return large[0] = 2 → correct!
+#### Step 3: `findMedian()` → after adding [1,2]
 
-✅ So final state: small = [-1], large = [2,3] → median = 2
+- `len(small) == 1`, `len(large) == 1` → equal sizes
+- Median = `(-self.small[0] + self.large[0]) / 2.0`
+  - `-self.small[0] = -(-1) = 1`
+  - `self.large[0] = 2`
+  - Median = `(1 + 2) / 2 = 1.5`
 
-Yes! Correct.
+✅ Output: `1.5` → Correct
+
+---
+
+#### Step 4: `addNum(3)`
+
+- Push `-3` into `small` → `small = [-3, -1]` → top is `-3` → value is 3
+- Check: is `top(small)` > `top(large)`?
+  - `-self.small[0] = 3`, `self.large[0] = 2`
+  - Is `3 > 2`? Yes → need to fix!
+- So:
+  - Pop from `small`: `val = -heapq.heappop(self.small)` → pop `-3` ⇒ `val = 3`
+  - Push `3` into `large`: now `large = [2, 3]` → min-heap: `[2, 3]`
+  - Now `small = [-1]`, `large = [2, 3]`
+- Recheck size balance:
+  - `len(small) = 1`, `len(large) = 2` → difference is 1 → acceptable
+
+✅ Final state:
+- `small = [-1]` → {1}
+- `large = [2, 3]` → {2, 3}
+
+---
+
+#### Step 5: `findMedian()` → after [1,2,3]
+
+- `len(small) = 1`, `len(large) = 2` → not equal
+- Since `large` has more elements → median is `large[0] = 2`
+
+✅ Output: `2.0` → Correct
+
+---
+
+#### ✅ Summary of States
+
+| Operation       | `small` (max-heap) | `large` (min-heap) | Median |
+|----------------|--------------------|--------------------|--------|
+| addNum(1)      | [-1]               | []                 | —      |
+| addNum(2)      | [-1]               | [2]                | —      |
+| findMedian()   | [-1]               | [2]                | 1.5    |
+| addNum(3)      | [-1]               | [2, 3]             | —      |
+| findMedian()   | [-1]               | [2, 3]             | 2.0    |
+
+---
 
 ### ⏱️ Complexity
 - **addNum**: O(log n) — heap operations
@@ -902,242 +953,543 @@ Another test: `arr = [1,1,1,10,10,10], k=1, x=9`
 
 ## 7. [Kth Largest Element in an Array](https://leetcode.com/problems/kth-largest-element-in-an-array/)
 
-### 📝 Problem Summary
-Find the kth largest element in an unsorted array.
 
-### 🔍 Pattern
-- **Quickselect** (partition-based selection algorithm)
-- Alternative: **Heap** (min-heap of size k)
+### 🎯 Problem
 
-### ✅ Solution with Inline Comments (Quickselect)
+Given an array `nums` and integer `k`, find the **kth largest element**.
+
+> Example:  
+> `nums = [3,2,1,5,6,4]`, `k = 2` → return `5` (since 5 is the 2nd largest)
+
+---
+
+### ✅ Why Use a Min-Heap?
+
+We want the **kth largest**, so we only need to keep track of the **top k largest elements**.
+
+### Code
 
 ```python
-import random
-from typing import List
+import heapq
 
-def findKthLargest(nums: List[int], k: int) -> int:
-    # Convert k-th largest to (n - k)-th smallest
-    # So we want the element at index n-k in sorted order
-    target_idx = len(nums) - k
-    
-    def quickselect(left: int, right: int) -> int:
-        # Choose pivot randomly to avoid worst-case O(n²)
-        pivot_idx = random.randint(left, right)
+class Solution:
+    def findKthLargest(self, nums: list[int], k: int) -> int:
+        # Min-heap to store the k largest elements
+        heap = []
         
-        # Move pivot to end
-        nums[pivot_idx], nums[right] = nums[right], nums[pivot_idx]
+        for num in nums:
+            if len(heap) < k:
+                # If we have space, add the number
+                heapq.heappush(heap, num)
+            elif num > heap[0]:
+                # If current number is bigger than the smallest in heap,
+                # replace the smallest with this one
+                heapq.heapreplace(heap, num)
         
-        # Partition around pivot
-        pivot_val = nums[right]
-        store_idx = left  # where smaller elements go
-        
-        for i in range(left, right):
-            if nums[i] < pivot_val:
-                nums[store_idx], nums[i] = nums[i], nums[store_idx]
-                store_idx += 1
-        
-        # Place pivot in correct position
-        nums[right], nums[store_idx] = nums[store_idx], nums[right]
-        
-        # Now nums[store_idx] is in final sorted position
-        if store_idx == target_idx:
-            return nums[store_idx]
-        elif store_idx < target_idx:
-            return quickselect(store_idx + 1, right)
-        else:
-            return quickselect(left, store_idx - 1)
-    
-    return quickselect(0, len(nums) - 1)
-
-
-# ---- Official LeetCode Example ----
-if __name__ == "__main__":
-    # Example Input: nums = [3,2,1,5,6,4], k = 2
-    nums = [3, 2, 1, 5, 6, 4]
-    k = 2
-    
-    # Call function
-    result = findKthLargest(nums, k)
-    
-    # Expected Output: 5
-    # Sorted: [1,2,3,4,5,6] → 2nd largest = 5
-    print("Output:", result)  # Output: 5
+        # The root of the min-heap is the kth largest
+        return heap[0]
 ```
 
-### 🧪 Example Walkthrough
-- `nums = [3,2,1,5,6,4]`, `k=2` → `target_idx = 6-2 = 4`
-- Random pivot: say `pivot_idx=2` → value `1`
-- Swap `1` to end: `[3,2,6,5,4,1]`
-- Partition: move all `<1` to left → none → `store_idx=0`
-- Swap `1` to `store_idx=0` → `[1,2,6,5,4,3]` → pivot at 0
-- `0 != 4` → since `0 < 4`, recurse on `[2,6,5,4,3]` from index 1 to 5
-- Continue until `store_idx == 4` → return `nums[4]`
+---
 
-Eventually, it will place `5` at index 4 → return `5`.
+## 🔍 Step-by-Step Walkthrough with `nums = [3,2,1,5,6,4]`, `k = 2`
 
-### ⏱️ Complexity
-- **Average Time**: O(n) — each partition reduces problem size by half
-- **Worst Time**: O(n²) — bad pivot choices (but rare with randomization)
-- **Space**: O(1) — in-place partitioning; recursion stack O(log n)
+```python
+heap = []  # min-heap
+```
 
-> 💡 Note: Heap solution is O(n log k), which is better when k is small.
+1. **num = 3**
+   - len(heap) = 0 < 2 → push 3
+   - heap = [3]
+
+2. **num = 2**
+   - len(heap) = 1 < 2 → push 2
+   - heap = [2, 3]  (heap property: min at front)
+
+3. **num = 1**
+   - len(heap) = 2 → not less than k
+   - Is 1 > heap[0]? → 1 > 2? ❌ No → skip
+
+4. **num = 5**
+   - len(heap) = 2 → check if 5 > 2 → ✅ Yes
+   - Replace: `heapreplace(heap, 5)` → removes 2, adds 5
+   - heap = [3, 5] → now min is 3
+
+5. **num = 6**
+   - 6 > 3 → ✅ Yes
+   - `heapreplace(heap, 6)` → removes 3, adds 6
+   - heap = [5, 6] → min is 5
+
+6. **num = 4**
+   - 4 > 5? ❌ No → skip
+
+Final heap: `[5, 6]` → `heap[0] = 5` → return **5**
 
 ---
 
-✅ **Chunk 2 Complete**
+## ⏱️ Time & Space Complexity
 
-Would you like me to continue with **any remaining problems** or **review patterns**?  
-👉 Just say **"continue?"** or ask for a summary.
+| Metric | Complexity | Explanation |
+|-------|------------|-------------|
+| **Time** | O(n log k) | For each of n elements: heap operation takes O(log k) |
+| **Space** | O(k) | Heap stores at most k elements |
 
-You're absolutely right — thank you for the catch! 🙏
-
-We’ve covered **7 problems** so far, and you originally listed **8**. Let’s finish with the **last remaining problem**:
+> ✅ Efficient when **k is small** compared to n (e.g., k = 10, n = 10000)
 
 ---
 
-## 🔹 Pattern: Heap / Priority Queue + Sliding Window
 
-### 📌 How to Recognize
-- You’re dealing with **k lists**, **ranges**, or **multiple streams** of data.
-- Need to maintain a **minimum/maximum across k sources** at any time.
-- Often involves **moving window** or **iterating through multiple sorted arrays**.
-- Use **heap to efficiently get the smallest (or largest) current element** from all heads.
+### 💡 Pro Tips
 
-### 📌 Step-by-Step Thinking Process (Template)
-1. **Initialize heap** with the first element from each list (or array).
-2. **Extract min/max** from heap → add to result.
-3. **Push next element** from the same list into heap.
-4. **Repeat until all elements processed**.
-5. For sliding window: maintain a window of size `k`, use heap to track min/max in window.
+- Use `heapq.heapreplace()` instead of `heappop()` + `heappush()` for efficiency.
+- Always compare `num > heap[0]` — not `>=`, because duplicates are allowed.
+- This method works even if there are duplicate values.
 
-### 📌 Common Pitfalls & Edge Cases
-- Not handling empty lists → crash on `next` access.
-- Forgetting to push next node after popping.
-- Heap growing too large if not managed.
-- Off-by-one errors in indices.
+> Example: `nums = [1,1,1,2,2]`, `k = 3` → 3rd largest is `1` → correct.
 
 ---
 
 ## 8. [Smallest Range Covering Elements from K Lists](https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists/)
 
-### 📝 Problem Summary
-Given `k` sorted linked lists, find the smallest range that includes at least one number from each list. Return the range as `[start, end]`.
+### 🔗 Problem Statement:
+You are given `k` sorted integer arrays. You need to find the **smallest range** that includes **at least one number from each array**.
 
-### 🔍 Pattern
-- **Heap + Sliding Window**
-- Maintain a min-heap of current heads
-- Track global min and max in current window
-- Expand by taking next from list with smallest head
+The range is defined as `[start, end]`, and its **size** is `end - start`.
 
-### ✅ Solution with Inline Comments
+Return the **smallest such range**. If multiple ranges have the same size, return any one of them.
+
+
+### Example:
+
+```text
+Input: nums = [[4,10,15,24,26], [0,9,12,20], [5,18,22,30]]
+Output: [20,24]
+```
+
+Explanation: The range `[20,24]` covers:
+- 20 from the second list,
+- 24 from the first list,
+- 22 from the third list.
+
+All lists are covered, and it's the smallest possible range.
+
+
+### Key Insight:
+
+We want to minimize the difference (`end - start`) while ensuring that **each of the k lists contributes at least one element** in the range.
+
+A greedy + heap approach works well here.
+
+
+### ✅ Python Implementation:
 
 ```python
 import heapq
-from typing import List, Optional
+from typing import List
 
-# Definition for singly-linked list.
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
-
-def smallestRange(lists: List[Optional[ListNode]]) -> List[int]:
-    # Min-heap to store (value, list_idx, node_ptr)
-    heap = []
-    
-    # Initialize: push first node from each non-empty list
-    for i, lst in enumerate(lists):
-        if lst:
-            heapq.heappush(heap, (lst.val, i, lst))
-    
-    # Current range: min and max values in heap
-    min_val = heap[0][0]
-    max_val = max(node[0] for node in heap)
-    
-    # Best range found so far
-    best_range = [min_val, max_val]
-    
-    # Continue while we can still take next from any list
-    while len(heap) == len(lists):  # We need at least one from each list
-        # Pop the smallest value
-        val, list_idx, node = heapq.heappop(heap)
+class Solution:
+    def smallestRange(self, nums: List[List[int]]) -> List[int]:
+        # Min-heap to store (value, list_index, index_in_list)
+        heap = []
+        max_val = float('-inf')
         
-        # Move to next node in that list
-        if node.next:
-            new_node = node.next
-            heapq.heappush(heap, (new_node.val, list_idx, new_node))
+        # Initialize: add the first element from each list
+        for i in range(len(nums)):
+            heapq.heappush(heap, (nums[i][0], i, 0))
+            max_val = max(max_val, nums[i][0])
+        
+        # Initialize result range
+        best_start, best_end = float('-inf'), float('inf')
+        
+        while heap:
+            min_val, list_idx, idx_in_list = heapq.heappop(heap)
             
-            # Update max_val if new value is larger
-            max_val = max(max_val, new_node.val)
+            # Update the best range if current range is smaller
+            if max_val - min_val < best_end - best_start:
+                best_start, best_end = min_val, max_val
             
-            # Check if current range is smaller
-            current_min = heap[0][0]  # min in heap now
-            if max_val - current_min < best_range[1] - best_range[0]:
-                best_range = [current_min, max_val]
-        else:
-            # No more nodes in this list → cannot cover all k lists
-            break
-    
-    return best_range
-
-
-# ---- Official LeetCode Example ----
-if __name__ == "__main__":
-    # Example Input: lists = [[4,10,15,24,26],[0,9,12,20],[5,18,22,30]]
-    # Build linked lists
-    l1 = ListNode(4, ListNode(10, ListNode(15, ListNode(24, ListNode(26)))))
-    l2 = ListNode(0, ListNode(9, ListNode(12, ListNode(20))))
-    l3 = ListNode(5, ListNode(18, ListNode(22, ListNode(30))))
-    
-    lists = [l1, l2, l3]
-    
-    # Call function
-    result = smallestRange(lists)
-    
-    # Expected Output: [20,24]
-    # Explanation: 20 from list2, 24 from list1 → range [20,24] covers all
-    print("Output:", result)  # Output: [20, 24]
+            # Move to next element in the same list
+            if idx_in_list + 1 < len(nums[list_idx]):
+                next_val = nums[list_idx][idx_in_list + 1]
+                heapq.heappush(heap, (next_val, list_idx, idx_in_list + 1))
+                max_val = max(max_val, next_val)
+            else:
+                # One list is exhausted; we can't form a valid range anymore
+                break
+        
+        return [best_start, best_end]
 ```
 
-### 🧪 Example Walkthrough
-- Initial heap: `(0,l2,0), (4,l1,4), (5,l3,5)` → min=0, max=5 → range=[0,5]
-- Pop 0 → push 9 → heap: `(4,l1,4), (5,l3,5), (9,l2,9)` → min=4, max=9 → range=[4,9]
-- Pop 4 → push 10 → heap: `(5,l3,5), (9,l2,9), (10,l1,10)` → min=5, max=10 → range=[5,10]
-- Pop 5 → push 18 → heap: `(9,l2,9), (10,l1,10), (18,l3,18)` → min=9, max=18 → range=[9,18]
-- Pop 9 → push 12 → heap: `(10,l1,10), (12,l2,12), (18,l3,18)` → min=10, max=18 → range=[10,18]
-- Pop 10 → push 15 → heap: `(12,l2,12), (15,l1,15), (18,l3,18)` → min=12, max=18 → range=[12,18]
-- Pop 12 → push 20 → heap: `(15,l1,15), (18,l3,18), (20,l2,20)` → min=15, max=20 → range=[15,20]
-- Pop 15 → push 24 → heap: `(18,l3,18), (20,l2,20), (24,l1,24)` → min=18, max=24 → range=[18,24]
-- Pop 18 → push 22 → heap: `(20,l2,20), (22,l3,22), (24,l1,24)` → min=20, max=24 → range=[20,24]
-- Now `max-min = 4` → better than previous best (e.g., 18–12=6) → update best_range = [20,24]
-- Pop 20 → push 26? But no — l2 has no next? Wait: l2 ends at 20 → so after pop 20, we break.
 
-Wait: l2 has nodes: 0→9→12→20 → so after 20, no next → so when we pop 20, we don't push anything → then `len(heap)=2 < 3` → break.
+### 📊 Complexity Analysis:
 
-So final best range: [20,24] ✅
+- **Time Complexity:**  
+  O(N log k), where N is the total number of elements across all lists, and k is the number of lists.  
+  Each element is pushed and popped once from the heap (log k per operation).
 
-Yes — this is minimal because:
-- 20 is in list2
-- 24 is in list1
-- 22 is in list3
-- So all three lists are covered
-- Any smaller range would miss at least one list
+- **Space Complexity:**  
+  O(k) for the heap (stores one element per list at a time).
 
-### ⏱️ Complexity
-- **Time**: O(N log k), where N = total nodes, k = number of lists
-- **Space**: O(k) — heap holds at most k nodes
+
+### 💡 Why This Works:
+
+- We always maintain one element from each list (initially), then replace the smallest one with the next in its list.
+- By doing this, we ensure we never skip a potentially better range.
+- The heap ensures we always process the smallest current element, which helps shrink the range.
+
+### Example walkthrough
+
+We’ll use this example:
+
+```python
+nums = [
+    [4, 10, 15, 24, 26],   # List 0
+    [0, 9, 12, 20],        # List 1
+    [5, 18, 22, 30]         # List 2
+]
+```
+
+
+#### 🧩 Line-by-Line Walkthrough (With Visuals & Tracing)
+
+Let’s now go **step-by-step**, updating variables at every stage.
+
+#### 🔹 Step 1: Initialize `heap` and `max_val`
+
+```python
+heap = []
+max_val = float('-inf')  # -∞
+```
+
+Now loop over each list (`i = 0, 1, 2`):
+
+#### ➤ i = 0: List 0 → element = `4`
+- Push `(4, 0, 0)` into heap
+- `max_val = max(-∞, 4) = 4`
+
+Heap: `[(4, 0, 0)]`
+
+#### ➤ i = 1: List 1 → element = `0`
+- Push `(0, 1, 0)` into heap
+- `max_val = max(4, 0) = 4`
+
+Heap: `[(0, 1, 0), (4, 0, 0)]` → min-heap sorted: `[0, 4]`
+
+#### ➤ i = 2: List 2 → element = `5`
+- Push `(5, 2, 0)` into heap
+- `max_val = max(4, 5) = 5`
+
+Heap: `[(0, 1, 0), (4, 0, 0), (5, 2, 0)]` → sorted by value
+
+✅ **After initialization:**
+- `heap = [(0, 1, 0), (4, 0, 0), (5, 2, 0)]`
+- `max_val = 5`
+- `best_start = -∞`, `best_end = ∞`
+
+> 🔍 This window: `{0 (list1), 4 (list0), 5 (list2)}` → covers all lists!
 
 ---
 
-✅ **All 8 Problems Complete!**
+### 🔹 Step 2: Set `best_start`, `best_end`
 
-🎉 You now have:
-- A full breakdown of **core patterns** used across these problems
-- **Interview-ready templates** with recognition tips, thought process, and pitfalls
-- **Editorial-style solutions** with comments, examples, and complexity analysis
-- **Runnable code blocks** for testing
+```python
+best_start, best_end = float('-inf'), float('inf')
+```
 
-Would you like me to generate a **PDF summary**, **cheat sheet**, or **flashcards** for these patterns?  
-Or perhaps go over **common mistakes in interviews** for these topics?
+So far, no valid range → we’ll update it when we find a better one.
 
-Let me know how I can help further! 💡
+---
+
+### 🔹 Step 3: Start the `while heap:` Loop
+
+We process the heap until it's empty or a list runs out.
+
+Let’s trace each iteration.
+
+---
+
+#### 🔁 Iteration 1: Pop `(0, 1, 0)`
+
+```python
+min_val, list_idx, idx_in_list = heapq.heappop(heap)
+# → min_val = 0, list_idx = 1, idx_in_list = 0
+```
+
+Now check:
+```python
+if max_val - min_val < best_end - best_start:
+    # 5 - 0 = 5 < ∞ - (-∞) → True
+    best_start, best_end = 0, 5
+```
+
+✅ Update best range: `[0, 5]` (size = 5)
+
+Now try to advance list 1:
+```python
+if idx_in_list + 1 < len(nums[1]):  # 0+1=1 < 4 → True
+    next_val = nums[1][1] = 9
+    heapq.heappush(heap, (9, 1, 1))
+    max_val = max(5, 9) = 9
+```
+
+✅ New heap: `[(4, 0, 0), (5, 2, 0), (9, 1, 1)]`  
+→ Sorted: `[4, 5, 9]`
+
+> 🔁 Now window: `{4, 5, 9}` → min=4, max=9 → range=5
+
+---
+
+#### 🔁 Iteration 2: Pop `(4, 0, 0)`
+
+```python
+min_val = 4, list_idx = 0, idx_in_list = 0
+```
+
+Check:
+```python
+if 9 - 4 = 5 < 5 - 0 = 5? → No (5 < 5 is False)
+```
+
+No update.
+
+Advance list 0:
+```python
+if 0+1=1 < 5 → True
+next_val = nums[0][1] = 10
+push (10, 0, 1)
+max_val = max(9, 10) = 10
+```
+
+Heap: `[(5, 2, 0), (9, 1, 1), (10, 0, 1)]` → sorted: `[5, 9, 10]`
+
+Window: `{5, 9, 10}` → range = 5
+
+---
+
+#### 🔁 Iteration 3: Pop `(5, 2, 0)`
+
+```python
+min_val = 5, list_idx = 2, idx_in_list = 0
+```
+
+Check:
+```python
+10 - 5 = 5 < 5 → False → no update
+```
+
+Advance list 2:
+```python
+1 < 4 → True
+next_val = nums[2][1] = 18
+push (18, 2, 1)
+max_val = max(10, 18) = 18
+```
+
+Heap: `[(9, 1, 1), (10, 0, 1), (18, 2, 1)]` → `[9, 10, 18]`
+
+Window: `{9, 10, 18}` → range = 9
+
+---
+
+#### 🔁 Iteration 4: Pop `(9, 1, 1)`
+
+```python
+min_val = 9, list_idx = 1, idx_in_list = 1
+```
+
+Check:
+```python
+18 - 9 = 9 < 5? → No → skip
+```
+
+Advance list 1:
+```python
+1+1=2 < 4 → True
+next_val = nums[1][2] = 12
+push (12, 1, 2)
+max_val = max(18, 12) = 18
+```
+
+Heap: `[(10, 0, 1), (12, 1, 2), (18, 2, 1)]` → `[10, 12, 18]`
+
+Window: `{10, 12, 18}` → range = 8
+
+---
+
+#### 🔁 Iteration 5: Pop `(10, 0, 1)`
+
+```python
+min_val = 10, list_idx = 0, idx_in_list = 1
+```
+
+Check:
+```python
+18 - 10 = 8 < 5? → No
+```
+
+Advance list 0:
+```python
+1+1=2 < 5 → True
+next_val = nums[0][2] = 15
+push (15, 0, 2)
+max_val = max(18, 15) = 18
+```
+
+Heap: `[(12, 1, 2), (15, 0, 2), (18, 2, 1)]` → `[12, 15, 18]`
+
+Window: `{12, 15, 18}` → range = 6
+
+---
+
+#### 🔁 Iteration 6: Pop `(12, 1, 2)`
+
+```python
+min_val = 12, list_idx = 1, idx_in_list = 2
+```
+
+Check:
+```python
+18 - 12 = 6 < 5? → No
+```
+
+Advance list 1:
+```python
+2+1=3 < 4 → True
+next_val = nums[1][3] = 20
+push (20, 1, 3)
+max_val = max(18, 20) = 20
+```
+
+Heap: `[(15, 0, 2), (18, 2, 1), (20, 1, 3)]` → `[15, 18, 20]`
+
+Window: `{15, 18, 20}` → range = 5 → same as before → no update
+
+---
+
+#### 🔁 Iteration 7: Pop `(15, 0, 2)`
+
+```python
+min_val = 15, list_idx = 0, idx_in_list = 2
+```
+
+Check:
+```python
+20 - 15 = 5 < 5? → No
+```
+
+Advance list 0:
+```python
+2+1=3 < 5 → True
+next_val = nums[0][3] = 24
+push (24, 0, 3)
+max_val = max(20, 24) = 24
+```
+
+Heap: `[(18, 2, 1), (20, 1, 3), (24, 0, 3)]` → `[18, 20, 24]`
+
+Window: `{18, 20, 24}` → range = 6
+
+---
+
+#### 🔁 Iteration 8: Pop `(18, 2, 1)`
+
+```python
+min_val = 18, list_idx = 2, idx_in_list = 1
+```
+
+Check:
+```python
+24 - 18 = 6 < 5? → No
+```
+
+Advance list 2:
+```python
+1+1=2 < 4 → True
+next_val = nums[2][2] = 22
+push (22, 2, 2)
+max_val = max(24, 22) = 24
+```
+
+Heap: `[(20, 1, 3), (22, 2, 2), (24, 0, 3)]` → `[20, 22, 24]`
+
+Now check:
+```python
+24 - 20 = 4 < 5? → YES!
+```
+
+✅ Update best range: `best_start = 20`, `best_end = 24`
+
+> 🔥 We found a better range: `[20, 24]` (size = 4)
+
+---
+
+#### 🔁 Iteration 9: Pop `(20, 1, 3)`
+
+```python
+min_val = 20, list_idx = 1, idx_in_list = 3
+```
+
+Check:
+```python
+24 - 20 = 4 < 4? → No (4 == 4)
+```
+
+Now try to advance list 1:
+```python
+3+1=4 < 4? → False → list 1 is exhausted!
+break
+```
+
+🔚 **Loop ends.**
+
+---
+
+## ✅ Final Output
+
+```python
+return [best_start, best_end]  # → [20, 24]
+```
+
+---
+
+## 📊 Summary Table: Key Variables Over Time
+
+| Iteration | Popped From | New Max | Current Window | Range | Best Range |
+|----------|-------------|---------|----------------|-------|------------|
+| 1        | List 1 (0)  | 9       | {4,5,9}        | 5     | [0,5]      |
+| 2        | List 0 (4)  | 10      | {5,9,10}       | 5     | [0,5]      |
+| 3        | List 2 (5)  | 18      | {9,10,18}      | 9     | [0,5]      |
+| 4        | List 1 (9)  | 18      | {10,12,18}     | 8     | [0,5]      |
+| 5        | List 0 (10) | 18      | {12,15,18}     | 6     | [0,5]      |
+| 6        | List 1 (12) | 20      | {15,18,20}     | 5     | [0,5]      |
+| 7        | List 0 (15) | 24      | {18,20,24}     | 6     | [0,5]      |
+| 8        | List 2 (18) | 24      | {20,22,24}     | 4     | ✅ [20,24]  |
+| 9        | List 1 (20) | 24      | ❌ List 1 done → break |
+
+---
+
+## 💡 Why This Works: Algorithm Logic
+
+| Concept | Explanation |
+|--------|-------------|
+| **Min-Heap** | Always picks the smallest current element → helps shrink the left side of the range. |
+| **Track `max_val`** | Ensures we know how wide the current window is. |
+| **Replace with next in same list** | Keeps one element per list, explores new combinations. |
+| **Break when list exhausted** | Can’t form a full window anymore → stop. |
+| **Greedy but optimal** | Because arrays are sorted, advancing the smallest guarantees we don’t miss the global minimum. |
+
+---
+
+## 🎯 Final Answer
+
+```python
+[20, 24]
+```
+
+## 📌 Pro Tips for Understanding
+
+- Think of the heap as a **"priority queue"** of "front runners" — always the smallest.
+- The `max_val` is like the **tallest person in the group** — we care about the span between shortest and tallest.
+- Every time we move the shortest forward, we're trying to **tighten the group**.
+
+
