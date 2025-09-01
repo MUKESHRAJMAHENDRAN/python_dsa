@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.39">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Linked List</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="linked_list_files/libs/clipboard/clipboard.min.js"></script>
+<script src="linked_list_files/libs/quarto-html/quarto.js"></script>
+<script src="linked_list_files/libs/quarto-html/popper.min.js"></script>
+<script src="linked_list_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="linked_list_files/libs/quarto-html/anchor.min.js"></script>
+<link href="linked_list_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="linked_list_files/libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="linked_list_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="linked_list_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="linked_list_files/libs/bootstrap/bootstrap-8a79a254b8e706d3c925cde0a310d4f0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Linked List</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="core-patterns-identified-in-this-chunk" class="level2">
+<h2 class="anchored" data-anchor-id="core-patterns-identified-in-this-chunk">🎯 Core Patterns Identified in This Chunk:</h2>
+<ol type="1">
+<li><strong>Two Pointers</strong> (with dummy node or fast/slow)</li>
+<li><strong>Pointer Rewiring</strong> (reversing, reordering, splitting linked lists)</li>
+<li><strong>Fast/Slow Pointers</strong> (cycle detection, middle finding)</li>
+<li><strong>Dummy Node Technique</strong> (clean traversal and manipulation)</li>
+<li><strong>Hash Map + Doubly Linked List</strong> (for LRU Cache — advanced but critical)</li>
+</ol>
+</section>
+<section id="pattern-1-two-pointers-with-dummy-node" class="level2">
+<h2 class="anchored" data-anchor-id="pattern-1-two-pointers-with-dummy-node">🧠 Pattern 1: Two Pointers (with Dummy Node)</h2>
+<section id="how-to-recognize" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-recognize">✅ How to Recognize</h3>
+<ul>
+<li>You’re working with a <strong>linked list</strong> and need to traverse it efficiently.</li>
+<li>Common use cases:
+<ul>
+<li>Merging two sorted lists</li>
+<li>Removing nodes from end (e.g., Nth from end)</li>
+<li>Swapping adjacent nodes</li>
+</ul></li>
+<li>Look for phrases like:
+<ul>
+<li>“Remove the nth node from the end”</li>
+<li>“Merge two sorted lists”</li>
+<li>“Swap every two adjacent nodes”</li>
+</ul></li>
+</ul>
+</section>
+<section id="step-by-step-thinking-process-recipe" class="level3">
+<h3 class="anchored" data-anchor-id="step-by-step-thinking-process-recipe">📝 Step-by-Step Thinking Process (Recipe)</h3>
+<ol type="1">
+<li>Use a <strong>dummy head</strong> to avoid edge case handling (e.g., removing the first node).</li>
+<li>Initialize two pointers: <code>left</code> and <code>right</code>.</li>
+<li>Position them appropriately (e.g., <code>right</code> starts at <code>head</code>, <code>left</code> at dummy).</li>
+<li>Move one pointer ahead by N steps (if needed).</li>
+<li>Move both pointers until <code>right</code> reaches the end.</li>
+<li>Now <code>left.next</code> is the node to remove/edit.</li>
+<li>Perform the required operation (update <code>next</code>, reverse links, etc.).</li>
+</ol>
+</section>
+<section id="pitfalls-edge-cases" class="level3">
+<h3 class="anchored" data-anchor-id="pitfalls-edge-cases">⚠️ Pitfalls &amp; Edge Cases</h3>
+<ul>
+<li>Forgetting to return <code>dummy.next</code> instead of <code>head</code>.</li>
+<li>Not handling empty list (<code>head == None</code>).</li>
+<li>Off-by-one errors when counting from end.</li>
+<li>Not updating <code>prev</code> correctly during rewiring.</li>
+</ul>
+</section>
+</section>
+<section id="pattern-2-fastslow-pointers-floyds-cycle-detection" class="level2">
+<h2 class="anchored" data-anchor-id="pattern-2-fastslow-pointers-floyds-cycle-detection">🧠 Pattern 2: Fast/Slow Pointers (Floyd’s Cycle Detection)</h2>
+<section id="how-to-recognize-1" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-recognize-1">✅ How to Recognize</h3>
+<ul>
+<li>Problem asks about:
+<ul>
+<li>Finding the <strong>middle</strong> of a linked list.</li>
+<li>Detecting a <strong>cycle</strong>.</li>
+<li>Determining if a list has a loop.</li>
+</ul></li>
+<li>Key phrase: “find the middle”, “detect cycle”, “loop”.</li>
+</ul>
+</section>
+<section id="step-by-step-thinking-process-recipe-1" class="level3">
+<h3 class="anchored" data-anchor-id="step-by-step-thinking-process-recipe-1">📝 Step-by-Step Thinking Process (Recipe)</h3>
+<ol type="1">
+<li>Initialize two pointers: <code>slow = head</code>, <code>fast = head</code>.</li>
+<li>Move <code>fast</code> two steps per iteration, <code>slow</code> one step.</li>
+<li>When <code>fast</code> hits the end (<code>fast == None</code> or <code>fast.next == None</code>), <code>slow</code> is at the middle.</li>
+<li>For cycle detection:
+<ul>
+<li>If <code>fast</code> meets <code>slow</code> again → cycle exists.</li>
+<li>Otherwise, no cycle.</li>
+</ul></li>
+</ol>
+</section>
+<section id="pitfalls-edge-cases-1" class="level3">
+<h3 class="anchored" data-anchor-id="pitfalls-edge-cases-1">⚠️ Pitfalls &amp; Edge Cases</h3>
+<ul>
+<li><code>fast</code> might be <code>None</code> before <code>fast.next</code>, so check <code>fast and fast.next</code>.</li>
+<li>Don’t forget to reset pointers after detecting cycle.</li>
+<li>In some variants (like reorder), you must reverse the second half properly.</li>
+</ul>
+</section>
+</section>
+<section id="pattern-3-pointer-rewiring-manual-link-manipulation" class="level2">
+<h2 class="anchored" data-anchor-id="pattern-3-pointer-rewiring-manual-link-manipulation">🧠 Pattern 3: Pointer Rewiring (Manual Link Manipulation)</h2>
+<section id="how-to-recognize-2" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-recognize-2">✅ How to Recognize</h3>
+<ul>
+<li>You’re asked to:
+<ul>
+<li>Reverse a sublist.</li>
+<li>Swap pairs.</li>
+<li>Reorder nodes (odd/even split).</li>
+<li>Split and merge lists.</li>
+</ul></li>
+<li>The solution requires manually changing <code>.next</code> pointers.</li>
+</ul>
+</section>
+<section id="step-by-step-thinking-process-recipe-2" class="level3">
+<h3 class="anchored" data-anchor-id="step-by-step-thinking-process-recipe-2">📝 Step-by-Step Thinking Process (Recipe)</h3>
+<ol type="1">
+<li>Use temporary variables to store references (<code>prev</code>, <code>curr</code>, <code>nxt</code>).</li>
+<li>Traverse while saving next node before modifying current.</li>
+<li>Update <code>current.next = previous</code>.</li>
+<li>Move <code>previous</code> and <code>current</code> forward.</li>
+<li>Be careful not to lose the chain.</li>
+</ol>
+</section>
+<section id="pitfalls-edge-cases-2" class="level3">
+<h3 class="anchored" data-anchor-id="pitfalls-edge-cases-2">⚠️ Pitfalls &amp; Edge Cases</h3>
+<ul>
+<li>Losing reference to the rest of the list.</li>
+<li>Not returning the new head (especially after reversal).</li>
+<li>Misplacing <code>prev</code> or <code>head</code> after loops.</li>
+</ul>
+</section>
+</section>
+<section id="pattern-4-dummy-node-technique" class="level2">
+<h2 class="anchored" data-anchor-id="pattern-4-dummy-node-technique">🧠 Pattern 4: Dummy Node Technique</h2>
+<section id="how-to-recognize-3" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-recognize-3">✅ How to Recognize</h3>
+<ul>
+<li>You’re doing operations that may affect the <strong>head</strong> of the list.</li>
+<li>Examples: insertion, deletion, merging.</li>
+<li>Avoids writing special logic for head changes.</li>
+</ul>
+</section>
+<section id="step-by-step-thinking-process-recipe-3" class="level3">
+<h3 class="anchored" data-anchor-id="step-by-step-thinking-process-recipe-3">📝 Step-by-Step Thinking Process (Recipe)</h3>
+<ol type="1">
+<li>Create a dummy node: <code>dummy = ListNode(0)</code>.</li>
+<li>Set <code>dummy.next = head</code>.</li>
+<li>Use <code>cur = dummy</code> as the working pointer.</li>
+<li>After all operations, return <code>dummy.next</code>.</li>
+</ol>
+</section>
+<section id="pitfalls-edge-cases-3" class="level3">
+<h3 class="anchored" data-anchor-id="pitfalls-edge-cases-3">⚠️ Pitfalls &amp; Edge Cases</h3>
+<ul>
+<li>Forgetting to return <code>dummy.next</code>.</li>
+<li>Using <code>dummy</code> directly instead of <code>dummy.next</code>.</li>
+</ul>
+</section>
+</section>
+<section id="pattern-5-hash-map-doubly-linked-list-lru-cache" class="level2">
+<h2 class="anchored" data-anchor-id="pattern-5-hash-map-doubly-linked-list-lru-cache">🧠 Pattern 5: Hash Map + Doubly Linked List (LRU Cache)</h2>
+<section id="how-to-recognize-4" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-recognize-4">✅ How to Recognize</h3>
+<ul>
+<li>You’re implementing an <strong>LRU (Least Recently Used)</strong> cache.</li>
+<li>Need to support <code>get(key)</code> and <code>put(key, value)</code> in O(1).</li>
+<li>Must maintain order of usage.</li>
+</ul>
+</section>
+<section id="step-by-step-thinking-process-recipe-4" class="level3">
+<h3 class="anchored" data-anchor-id="step-by-step-thinking-process-recipe-4">📝 Step-by-Step Thinking Process (Recipe)</h3>
+<ol type="1">
+<li>Use a <strong>hash map</strong> to store <code>{key: node}</code> for O(1) access.</li>
+<li>Use a <strong>doubly linked list</strong> to maintain order:
+<ul>
+<li>Most recently used at front.</li>
+<li>Least recently used at back.</li>
+</ul></li>
+<li>On <code>get</code>:
+<ul>
+<li>If key exists → move node to front.</li>
+<li>Return value.</li>
+</ul></li>
+<li>On <code>put</code>:
+<ul>
+<li>If key exists → update and move to front.</li>
+<li>Else add new node to front.</li>
+<li>If size &gt; capacity → remove tail node.</li>
+</ul></li>
+<li>Maintain helper methods: <code>add_to_front(node)</code>, <code>remove_node(node)</code>, <code>pop_tail()</code>.</li>
+</ol>
+</section>
+<section id="pitfalls-edge-cases-4" class="level3">
+<h3 class="anchored" data-anchor-id="pitfalls-edge-cases-4">⚠️ Pitfalls &amp; Edge Cases</h3>
+<ul>
+<li>Forgetting to remove old node before adding new one.</li>
+<li>Not updating hash map on removal.</li>
+<li>Handling empty cache.</li>
+<li>Double-checking <code>self.capacity</code> vs actual size.</li>
+</ul>
+</section>
+<section id="merge-two-sorted-lists" class="level3">
+<h3 class="anchored" data-anchor-id="merge-two-sorted-lists">1. <a href="https://leetcode.com/problems/merge-two-sorted-lists/">Merge Two Sorted Lists</a></h3>
+<section id="summary" class="level4">
+<h4 class="anchored" data-anchor-id="summary">📌 Summary</h4>
+<p>Merge two sorted linked lists into a single sorted list.</p>
+</section>
+<section id="patterns" class="level4">
+<h4 class="anchored" data-anchor-id="patterns">🔗 Pattern(s)</h4>
+<ul>
+<li>Two Pointers (with Dummy Node)</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mergeTwoLists(list1, list2):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a dummy node to simplify pointer management</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    dummy <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 'tail' points to the last node in merged list</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    tail <span class="op">=</span> dummy</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># While both lists are non-empty</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> list1 <span class="kw">and</span> list2:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compare values; attach smaller one</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> list1.val <span class="op">&lt;</span> list2.val:</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            tail.<span class="bu">next</span> <span class="op">=</span> list1</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            list1 <span class="op">=</span> list1.<span class="bu">next</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            tail.<span class="bu">next</span> <span class="op">=</span> list2</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            list2 <span class="op">=</span> list2.<span class="bu">next</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Move tail forward</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        tail <span class="op">=</span> tail.<span class="bu">next</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Attach remaining nodes (one list might be non-empty)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> list1:</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        tail.<span class="bu">next</span> <span class="op">=</span> list1</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> list2:</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        tail.<span class="bu">next</span> <span class="op">=</span> list2</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return the merged list (skip dummy)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dummy.<span class="bu">next</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: list1 = [1,2,4], list2 = [1,3,4]</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    l1 <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">4</span>)))</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    l2 <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>)))</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Call function</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    merged <span class="op">=</span> mergeTwoLists(l1, l2)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [1,1,2,3,4,4]</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> merged:</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        result.append(merged.val)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        merged <span class="op">=</span> merged.<span class="bu">next</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, result)  <span class="co"># Output: [1, 1, 2, 3, 4, 4]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example">🔍 Walkthrough (Example)</h4>
+<ul>
+<li>Initial: <code>list1 = [1,2,4]</code>, <code>list2 = [1,3,4]</code>, <code>dummy -&gt; None</code></li>
+<li>Step 1: <code>1 &lt;= 1</code> → attach <code>list1</code> (val=1), now <code>list1 = [2,4]</code></li>
+<li>Step 2: <code>2 &gt; 1</code> → attach <code>list2</code> (val=1), now <code>list2 = [3,4]</code></li>
+<li>Step 3: <code>2 &lt; 3</code> → attach <code>list1</code> (val=2)</li>
+<li>Step 4: <code>3 &lt; 4</code> → attach <code>list2</code> (val=3)</li>
+<li>Step 5: <code>4 == 4</code> → attach <code>list1</code> (val=4), <code>list1</code> becomes empty</li>
+<li>Final: Attach remaining <code>list2</code> → <code>[4]</code></li>
+<li>Result: <code>[1,1,2,3,4,4]</code></li>
+</ul>
+</section>
+<section id="complexity" class="level4">
+<h4 class="anchored" data-anchor-id="complexity">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(m + n), where m, n are lengths of lists</li>
+<li><strong>Space:</strong> O(1), only pointers used (excluding output)</li>
+</ul>
+</section>
+</section>
+<section id="linked-list-cycle" class="level3">
+<h3 class="anchored" data-anchor-id="linked-list-cycle">2. <a href="https://leetcode.com/problems/linked-list-cycle/">Linked List Cycle</a></h3>
+<section id="summary-1" class="level4">
+<h4 class="anchored" data-anchor-id="summary-1">📌 Summary</h4>
+<p>Determine if a linked list has a cycle. Return <code>True</code> if yes, <code>False</code> otherwise.</p>
+</section>
+<section id="patterns-1" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-1">🔗 Pattern(s)</h4>
+<ul>
+<li>Fast/Slow Pointers</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-1" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-1">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hasCycle(head):</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Handle empty list</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> head <span class="kw">or</span> <span class="kw">not</span> head.<span class="bu">next</span>:</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize slow and fast pointers</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    slow <span class="op">=</span> head</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    fast <span class="op">=</span> head</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Move slow by 1 step, fast by 2 steps</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> fast <span class="kw">and</span> fast.<span class="bu">next</span>:</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        slow <span class="op">=</span> slow.<span class="bu">next</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        fast <span class="op">=</span> fast.<span class="bu">next</span>.<span class="bu">next</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># If they meet, there's a cycle</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> slow <span class="op">==</span> fast:</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If fast reaches end, no cycle</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [3,2,0,-4], pos = 1 (cycle to node with value 2)</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create nodes</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    node0 <span class="op">=</span> ListNode(<span class="dv">3</span>)</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    node1 <span class="op">=</span> ListNode(<span class="dv">2</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    node2 <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    node3 <span class="op">=</span> ListNode(<span class="op">-</span><span class="dv">4</span>)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Link them</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    node0.<span class="bu">next</span> <span class="op">=</span> node1</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    node1.<span class="bu">next</span> <span class="op">=</span> node2</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    node2.<span class="bu">next</span> <span class="op">=</span> node3</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    node3.<span class="bu">next</span> <span class="op">=</span> node1  <span class="co"># creates cycle back to node1 (pos=1)</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check for cycle</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Has Cycle:"</span>, hasCycle(node0))  <span class="co"># Output: True</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-1" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-1">🔍 Walkthrough (Example)</h4>
+<ul>
+<li><code>slow = 3</code>, <code>fast = 3</code></li>
+<li>Step 1: <code>slow = 2</code>, <code>fast = 0</code></li>
+<li>Step 2: <code>slow = 0</code>, <code>fast = -4</code></li>
+<li>Step 3: <code>slow = -4</code>, <code>fast = 2</code></li>
+<li>Step 4: <code>slow = 2</code>, <code>fast = 0</code></li>
+<li>Step 5: <code>slow = 0</code>, <code>fast = -4</code></li>
+<li>Step 6: <code>slow = -4</code>, <code>fast = 2</code></li>
+<li>Step 7: <code>slow = 2</code>, <code>fast = 0</code></li>
+<li>Eventually, <code>slow == fast</code> → cycle detected.</li>
+</ul>
+</section>
+<section id="complexity-1" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-1">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n), worst case: fast goes around cycle once</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="reverse-linked-list" class="level3">
+<h3 class="anchored" data-anchor-id="reverse-linked-list">3. <a href="https://leetcode.com/problems/reverse-linked-list/">Reverse Linked List</a></h3>
+<section id="summary-2" class="level4">
+<h4 class="anchored" data-anchor-id="summary-2">📌 Summary</h4>
+<p>Reverse a singly linked list.</p>
+</section>
+<section id="patterns-2" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-2">🔗 Pattern(s)</h4>
+<ul>
+<li>Pointer Rewiring</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-2" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-2">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reverseList(head):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    prev <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    curr <span class="op">=</span> head</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Traverse the list</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> curr:</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Store next node before breaking link</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        nxt <span class="op">=</span> curr.<span class="bu">next</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reverse the link: curr → prev</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        curr.<span class="bu">next</span> <span class="op">=</span> prev</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Move prev and curr forward</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        prev <span class="op">=</span> curr</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        curr <span class="op">=</span> nxt</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># prev now points to the new head</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> prev</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4,5]</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>, ListNode(<span class="dv">5</span>)))))</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Call function</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    new_head <span class="op">=</span> reverseList(head)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [5,4,3,2,1]</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> new_head:</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>        result.append(new_head.val)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>        new_head <span class="op">=</span> new_head.<span class="bu">next</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, result)  <span class="co"># Output: [5, 4, 3, 2, 1]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-2" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-2">🔍 Walkthrough (Example)</h4>
+<ul>
+<li>Start: <code>prev=None</code>, <code>curr=1</code></li>
+<li>Iteration 1: <code>nxt=2</code>, <code>1.next=None</code>, <code>prev=1</code>, <code>curr=2</code></li>
+<li>Iteration 2: <code>nxt=3</code>, <code>2.next=1</code>, <code>prev=2</code>, <code>curr=3</code></li>
+<li>… continues until <code>curr=None</code></li>
+<li>Final: <code>prev=5</code>, which is the new head.</li>
+</ul>
+</section>
+<section id="complexity-2" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-2">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="middle-of-the-linked-list" class="level3">
+<h3 class="anchored" data-anchor-id="middle-of-the-linked-list">4. <a href="https://leetcode.com/problems/middle-of-the-linked-list/">Middle of the Linked List</a></h3>
+<section id="summary-3" class="level4">
+<h4 class="anchored" data-anchor-id="summary-3">📌 Summary</h4>
+<p>Find the middle node of a linked list. If even length, return the second middle.</p>
+</section>
+<section id="patterns-3" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-3">🔗 Pattern(s)</h4>
+<ul>
+<li>Fast/Slow Pointers</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-3" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-3">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> middleNode(head):</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Both pointers start at head</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    slow <span class="op">=</span> head</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    fast <span class="op">=</span> head</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fast moves twice as fast</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> fast <span class="kw">and</span> fast.<span class="bu">next</span>:</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        slow <span class="op">=</span> slow.<span class="bu">next</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        fast <span class="op">=</span> fast.<span class="bu">next</span>.<span class="bu">next</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># When fast reaches end, slow is at middle</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> slow</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4,5]</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>, ListNode(<span class="dv">5</span>)))))</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find middle</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    mid <span class="op">=</span> middleNode(head)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Middle Value:"</span>, mid.val)  <span class="co"># Output: 3</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4,5,6]</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    head2 <span class="op">=</span> ListNode(</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    ListNode(</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="dv">2</span>,</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        ListNode(</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>            <span class="dv">3</span>,</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>            ListNode(</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>                <span class="dv">4</span>,</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>                ListNode(</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>                    <span class="dv">5</span>,</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>                    ListNode(<span class="dv">6</span>))))))</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    mid2 <span class="op">=</span> middleNode(head2)</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Middle Value:"</span>, mid2.val)  <span class="co"># Output: 4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-1-1" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-1-1">🔍 Walkthrough (Example 1)</h4>
+<ul>
+<li><code>slow=1</code>, <code>fast=1</code></li>
+<li>Step 1: <code>slow=2</code>, <code>fast=3</code></li>
+<li>Step 2: <code>slow=3</code>, <code>fast=5</code></li>
+<li>Step 3: <code>fast.next = None</code> → stop</li>
+<li>Return <code>slow=3</code></li>
+</ul>
+</section>
+<section id="complexity-3" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-3">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="lru-cache" class="level3">
+<h3 class="anchored" data-anchor-id="lru-cache">5. <a href="https://leetcode.com/problems/lru-cache/">LRU Cache</a></h3>
+<section id="summary-4" class="level4">
+<h4 class="anchored" data-anchor-id="summary-4">📌 Summary</h4>
+<p>Implement an LRU cache with <code>get(key)</code> and <code>put(key, value)</code> in O(1).</p>
+</section>
+<section id="patterns-4" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-4">🔗 Pattern(s)</h4>
+<ul>
+<li>Hash Map + Doubly Linked List</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-4" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-4">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DListNode:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, key<span class="op">=</span><span class="dv">0</span>, val<span class="op">=</span><span class="dv">0</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.key <span class="op">=</span> key</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.prev <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LRUCache:</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, capacity: <span class="bu">int</span>):</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.capacity <span class="op">=</span> capacity</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.cache <span class="op">=</span> {}  <span class="co"># maps key -&gt; DListNode</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.head <span class="op">=</span> DListNode()  <span class="co"># dummy head</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tail <span class="op">=</span> DListNode()  <span class="co"># dummy tail</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.head.<span class="bu">next</span> <span class="op">=</span> <span class="va">self</span>.tail</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tail.prev <span class="op">=</span> <span class="va">self</span>.head</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _add_node(<span class="va">self</span>, node):</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Insert node right after head (most recent)"""</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        node.prev <span class="op">=</span> <span class="va">self</span>.head</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        node.<span class="bu">next</span> <span class="op">=</span> <span class="va">self</span>.head.<span class="bu">next</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.head.<span class="bu">next</span>.prev <span class="op">=</span> node</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.head.<span class="bu">next</span> <span class="op">=</span> node</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _remove_node(<span class="va">self</span>, node):</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Remove node from list"""</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        node.prev.<span class="bu">next</span> <span class="op">=</span> node.<span class="bu">next</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        node.<span class="bu">next</span>.prev <span class="op">=</span> node.prev</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _move_to_head(<span class="va">self</span>, node):</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Move existing node to head (most recent)"""</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._remove_node(node)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._add_node(node)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _pop_tail(<span class="va">self</span>):</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Remove and return tail node (least recent)"""</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        node <span class="op">=</span> <span class="va">self</span>.tail.prev</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._remove_node(node)</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> node</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get(<span class="va">self</span>, key: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> key <span class="kw">not</span> <span class="kw">in</span> <span class="va">self</span>.cache:</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>        node <span class="op">=</span> <span class="va">self</span>.cache[key]</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._move_to_head(node)</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> node.val</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> put(<span class="va">self</span>, key: <span class="bu">int</span>, value: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> key <span class="kw">in</span> <span class="va">self</span>.cache:</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Update existing node</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>            node <span class="op">=</span> <span class="va">self</span>.cache[key]</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>            node.val <span class="op">=</span> value</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._move_to_head(node)</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>            <span class="co"># New node</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>            node <span class="op">=</span> DListNode(key, value)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.cache[key] <span class="op">=</span> node</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._add_node(node)</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>            <span class="co"># If over capacity, remove least recent</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(<span class="va">self</span>.cache) <span class="op">&gt;</span> <span class="va">self</span>.capacity:</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>                removed <span class="op">=</span> <span class="va">self</span>._pop_tail()</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>                <span class="kw">del</span> <span class="va">self</span>.cache[removed.key]</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize cache with capacity 2</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>    lru <span class="op">=</span> LRUCache(<span class="dv">2</span>)</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Operations</span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>    lru.put(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>    lru.put(<span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Get 1:"</span>, lru.get(<span class="dv">1</span>))  <span class="co"># Output: 1</span></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    lru.put(<span class="dv">3</span>, <span class="dv">3</span>)  <span class="co"># Removes key 2</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Get 2:"</span>, lru.get(<span class="dv">2</span>))  <span class="co"># Output: -1</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    lru.put(<span class="dv">4</span>, <span class="dv">4</span>)  <span class="co"># Removes key 1</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Get 1:"</span>, lru.get(<span class="dv">1</span>))  <span class="co"># Output: -1</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Get 3:"</span>, lru.get(<span class="dv">3</span>))  <span class="co"># Output: 3</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Get 4:"</span>, lru.get(<span class="dv">4</span>))  <span class="co"># Output: 4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-3" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-3">🔍 Walkthrough (Example)</h4>
+<ul>
+<li>Put(1,1): cache={1:node1}, list: head &lt;-&gt; 1 &lt;-&gt; tail</li>
+<li>Put(2,2): cache={1:node1,2:node2}, list: head &lt;-&gt; 2 &lt;-&gt; 1 &lt;-&gt; tail</li>
+<li>Get(1): move 1 to front → list: head &lt;-&gt; 1 &lt;-&gt; 2 &lt;-&gt; tail</li>
+<li>Put(3,3): capacity full → remove 2 → list: head &lt;-&gt; 3 &lt;-&gt; 1 &lt;-&gt; tail</li>
+<li>Get(2): returns -1</li>
+</ul>
+</section>
+<section id="complexity-4" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-4">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(1) for both <code>get</code> and <code>put</code></li>
+<li><strong>Space:</strong> O(capacity)</li>
+</ul>
+</section>
+</section>
+<section id="remove-nth-node-from-end-of-list" class="level3">
+<h3 class="anchored" data-anchor-id="remove-nth-node-from-end-of-list">6. <a href="https://leetcode.com/problems/remove-nth-node-from-end-of-list/">Remove Nth Node From End of List</a></h3>
+<section id="summary-5" class="level4">
+<h4 class="anchored" data-anchor-id="summary-5">📌 Summary</h4>
+<p>Remove the nth node from the end of a linked list.</p>
+</section>
+<section id="patterns-5" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-5">🔗 Pattern(s)</h4>
+<ul>
+<li>Two Pointers + Dummy Node</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-5" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-5">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> removeNthFromEnd(head, n):</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Dummy node helps handle edge case: removing head</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    dummy <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    dummy.<span class="bu">next</span> <span class="op">=</span> head</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Left and right pointers</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    left <span class="op">=</span> dummy</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    right <span class="op">=</span> head</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Move right n steps ahead</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        right <span class="op">=</span> right.<span class="bu">next</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Move both until right reaches end</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> right:</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        left <span class="op">=</span> left.<span class="bu">next</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        right <span class="op">=</span> right.<span class="bu">next</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Now left.next is the node to remove</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    left.<span class="bu">next</span> <span class="op">=</span> left.<span class="bu">next</span>.<span class="bu">next</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return new head</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dummy.<span class="bu">next</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4,5], n = 2</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>, ListNode(<span class="dv">5</span>)))))</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove 2nd from end → remove 4</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    new_head <span class="op">=</span> removeNthFromEnd(head, <span class="dv">2</span>)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [1,2,3,5]</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> new_head:</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>        result.append(new_head.val)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>        new_head <span class="op">=</span> new_head.<span class="bu">next</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, result)  <span class="co"># Output: [1, 2, 3, 5]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-4" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-4">🔍 Walkthrough (Example)</h4>
+<ul>
+<li><code>left=dummy</code>, <code>right=head=1</code></li>
+<li>Move <code>right</code> 2 steps: <code>right=3</code></li>
+<li>Then move both until <code>right=None</code>:
+<ul>
+<li><code>left=1</code>, <code>right=4</code></li>
+<li><code>left=2</code>, <code>right=5</code></li>
+<li><code>left=3</code>, <code>right=None</code></li>
+</ul></li>
+<li>Remove <code>left.next</code> (node 4)</li>
+<li>Result: <code>[1,2,3,5]</code></li>
+</ul>
+</section>
+<section id="complexity-5" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-5">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="swap-nodes-in-pairs" class="level3">
+<h3 class="anchored" data-anchor-id="swap-nodes-in-pairs">7. <a href="https://leetcode.com/problems/swap-nodes-in-pairs/">Swap Nodes in Pairs</a></h3>
+<section id="summary-6" class="level4">
+<h4 class="anchored" data-anchor-id="summary-6">📌 Summary</h4>
+<p>Swap every two adjacent nodes in a linked list.</p>
+</section>
+<section id="patterns-6" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-6">🔗 Pattern(s)</h4>
+<ul>
+<li>Pointer Rewiring + Dummy Node</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-6" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-6">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> swapPairs(head):</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Dummy node to simplify handling</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    dummy <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    dummy.<span class="bu">next</span> <span class="op">=</span> head</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    prev <span class="op">=</span> dummy</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Traverse in pairs</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> prev.<span class="bu">next</span> <span class="kw">and</span> prev.<span class="bu">next</span>.<span class="bu">next</span>:</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Nodes to swap</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        first <span class="op">=</span> prev.<span class="bu">next</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        second <span class="op">=</span> first.<span class="bu">next</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Swap: prev → second → first → rest</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>        prev.<span class="bu">next</span> <span class="op">=</span> second</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        first.<span class="bu">next</span> <span class="op">=</span> second.<span class="bu">next</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        second.<span class="bu">next</span> <span class="op">=</span> first</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Move prev two steps forward</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        prev <span class="op">=</span> first</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dummy.<span class="bu">next</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4]</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>))))</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Swap pairs</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    swapped <span class="op">=</span> swapPairs(head)</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [2,1,4,3]</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> swapped:</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>        result.append(swapped.val)</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>        swapped <span class="op">=</span> swapped.<span class="bu">next</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, result)  <span class="co"># Output: [2, 1, 4, 3]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-5" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-5">🔍 Walkthrough (Example)</h4>
+<ul>
+<li><code>prev=dummy</code>, <code>first=1</code>, <code>second=2</code></li>
+<li>Swap: <code>dummy → 2 → 1 → 3 → 4</code></li>
+<li>Move <code>prev=1</code></li>
+<li>Next pair: <code>first=3</code>, <code>second=4</code></li>
+<li>Swap: <code>1 → 4 → 3 → None</code></li>
+<li>Final: <code>2 → 1 → 4 → 3</code></li>
+</ul>
+</section>
+<section id="complexity-6" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-6">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="odd-even-linked-list" class="level3">
+<h3 class="anchored" data-anchor-id="odd-even-linked-list">8. <a href="https://leetcode.com/problems/odd-even-linked-list/">Odd Even Linked List</a></h3>
+<section id="summary-7" class="level4">
+<h4 class="anchored" data-anchor-id="summary-7">📌 Summary</h4>
+<p>Reorder a linked list so that all odd-positioned nodes come before even-positioned ones, preserving relative order.</p>
+</section>
+<section id="patterns-7" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-7">🔗 Pattern(s)</h4>
+<ul>
+<li>Pointer Rewiring (splitting and merging)</li>
+<li>Two Pointers (odd/even heads)</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-7" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-7">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> oddEvenList(head):</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Handle empty or single node</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> head <span class="kw">or</span> <span class="kw">not</span> head.<span class="bu">next</span>:</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> head</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create two dummy heads for odd and even lists</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    odd_head <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    even_head <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    odd_curr <span class="op">=</span> odd_head</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    even_curr <span class="op">=</span> even_head</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    curr <span class="op">=</span> head</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    is_odd <span class="op">=</span> <span class="va">True</span>  <span class="co"># Start with odd position (1st node)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Traverse and split</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> curr:</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> is_odd:</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>            odd_curr.<span class="bu">next</span> <span class="op">=</span> curr</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>            odd_curr <span class="op">=</span> curr</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>            even_curr.<span class="bu">next</span> <span class="op">=</span> curr</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            even_curr <span class="op">=</span> curr</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Toggle for next node</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        is_odd <span class="op">=</span> <span class="kw">not</span> is_odd</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        curr <span class="op">=</span> curr.<span class="bu">next</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Terminate both lists</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    odd_curr.<span class="bu">next</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    even_curr.<span class="bu">next</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Merge: odd list → even list</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    odd_curr.<span class="bu">next</span> <span class="op">=</span> even_head.<span class="bu">next</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return new head (first node of odd list)</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> odd_head.<span class="bu">next</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4,5]</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>, ListNode(<span class="dv">5</span>)))))</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reorder</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>    result_head <span class="op">=</span> oddEvenList(head)</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [1,3,5,2,4]</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> result_head:</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        result.append(result_head.val)</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>        result_head <span class="op">=</span> result_head.<span class="bu">next</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, result)  <span class="co"># Output: [1, 3, 5, 2, 4]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-6" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-6">🔍 Walkthrough (Example)</h4>
+<ul>
+<li><code>curr=1</code> (odd): attach to <code>odd_curr</code>, <code>odd_curr=1</code></li>
+<li><code>curr=2</code> (even): attach to <code>even_curr</code>, <code>even_curr=2</code></li>
+<li><code>curr=3</code> (odd): <code>odd_curr=3</code></li>
+<li><code>curr=4</code> (even): <code>even_curr=4</code></li>
+<li><code>curr=5</code> (odd): <code>odd_curr=5</code></li>
+<li>Now: <code>odd_list = 1→3→5</code>, <code>even_list = 2→4</code></li>
+<li>Link: <code>5.next = 2</code></li>
+<li>Final: <code>1→3→5→2→4</code></li>
+</ul>
+</section>
+<section id="complexity-7" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-7">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="add-two-numbers" class="level3">
+<h3 class="anchored" data-anchor-id="add-two-numbers">9. <a href="https://leetcode.com/problems/add-two-numbers/">Add Two Numbers</a></h3>
+<section id="summary-8" class="level4">
+<h4 class="anchored" data-anchor-id="summary-8">📌 Summary</h4>
+<p>Add two numbers represented as reverse-linked lists (each digit in a node). Return sum as a similar list.</p>
+</section>
+<section id="patterns-8" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-8">🔗 Pattern(s)</h4>
+<ul>
+<li>Linked List + Arithmetic (carry logic)</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-8" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-8">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> addTwoNumbers(l1, l2):</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Dummy head for result</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    dummy <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    curr <span class="op">=</span> dummy</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    carry <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Process both lists and carry</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> l1 <span class="kw">or</span> l2 <span class="kw">or</span> carry:</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Get values (0 if list exhausted)</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        val1 <span class="op">=</span> l1.val <span class="cf">if</span> l1 <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        val2 <span class="op">=</span> l2.val <span class="cf">if</span> l2 <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Sum including carry</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        total <span class="op">=</span> val1 <span class="op">+</span> val2 <span class="op">+</span> carry</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># New digit and carry</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        carry <span class="op">=</span> total <span class="op">//</span> <span class="dv">10</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        digit <span class="op">=</span> total <span class="op">%</span> <span class="dv">10</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add digit to result</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        curr.<span class="bu">next</span> <span class="op">=</span> ListNode(digit)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        curr <span class="op">=</span> curr.<span class="bu">next</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Move forward</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        l1 <span class="op">=</span> l1.<span class="bu">next</span> <span class="cf">if</span> l1 <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        l2 <span class="op">=</span> l2.<span class="bu">next</span> <span class="cf">if</span> l2 <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dummy.<span class="bu">next</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: l1 = [2,4,3], l2 = [5,6,4]</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Represents 342 + 465 = 807</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    l1 <span class="op">=</span> ListNode(<span class="dv">2</span>, ListNode(<span class="dv">4</span>, ListNode(<span class="dv">3</span>)))</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    l2 <span class="op">=</span> ListNode(<span class="dv">5</span>, ListNode(<span class="dv">6</span>, ListNode(<span class="dv">4</span>)))</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> addTwoNumbers(l1, l2)</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [7,0,8]</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> []</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> result:</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>        output.append(result.val)</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> result.<span class="bu">next</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, output)  <span class="co"># Output: [7, 0, 8]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-7" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-7">🔍 Walkthrough (Example)</h4>
+<ul>
+<li>Step 1: <code>2+5=7</code>, carry=0 → node 7</li>
+<li>Step 2: <code>4+6=10</code>, carry=1 → digit=0, node 0</li>
+<li>Step 3: <code>3+4+1=8</code>, carry=0 → node 8</li>
+<li>Done → <code>7→0→8</code></li>
+</ul>
+</section>
+<section id="complexity-8" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-8">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(max(m,n))</li>
+<li><strong>Space:</strong> O(max(m,n)) for result</li>
+</ul>
+</section>
+</section>
+<section id="sort-list" class="level3">
+<h3 class="anchored" data-anchor-id="sort-list">10. <a href="https://leetcode.com/problems/sort-list/">Sort List</a></h3>
+<section id="summary-9" class="level4">
+<h4 class="anchored" data-anchor-id="summary-9">📌 Summary</h4>
+<p>Sort a linked list in ascending order using <strong>merge sort (divide &amp; conquer)</strong>.</p>
+</section>
+<section id="patterns-9" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-9">🔗 Pattern(s)</h4>
+<ul>
+<li>Divide &amp; Conquer (Merge Sort)</li>
+<li>Fast/Slow Pointers (to split list)</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-9" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-9">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sortList(head):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Base case: empty or single node</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> head <span class="kw">or</span> <span class="kw">not</span> head.<span class="bu">next</span>:</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> head</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find middle using fast/slow pointers</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    slow <span class="op">=</span> head</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    fast <span class="op">=</span> head.<span class="bu">next</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> fast <span class="kw">and</span> fast.<span class="bu">next</span>:</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        slow <span class="op">=</span> slow.<span class="bu">next</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        fast <span class="op">=</span> fast.<span class="bu">next</span>.<span class="bu">next</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Split: right half starts at slow.next</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    mid <span class="op">=</span> slow.<span class="bu">next</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    slow.<span class="bu">next</span> <span class="op">=</span> <span class="va">None</span>  <span class="co"># Break link</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Recursively sort both halves</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    left <span class="op">=</span> sortList(head)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    right <span class="op">=</span> sortList(mid)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Merge sorted halves</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> merge(left, right)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> merge(l1, l2):</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    dummy <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    curr <span class="op">=</span> dummy</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> l1 <span class="kw">and</span> l2:</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> l1.val <span class="op">&lt;</span> l2.val:</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>            curr.<span class="bu">next</span> <span class="op">=</span> l1</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>            l1 <span class="op">=</span> l1.<span class="bu">next</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>            curr.<span class="bu">next</span> <span class="op">=</span> l2</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>            l2 <span class="op">=</span> l2.<span class="bu">next</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        curr <span class="op">=</span> curr.<span class="bu">next</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Attach remaining</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> l1:</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>        curr.<span class="bu">next</span> <span class="op">=</span> l1</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> l2:</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>        curr.<span class="bu">next</span> <span class="op">=</span> l2</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dummy.<span class="bu">next</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [4,2,1,3]</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">4</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">1</span>, ListNode(<span class="dv">3</span>))))</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sort</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    sorted_head <span class="op">=</span> sortList(head)</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [1,2,3,4]</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> sorted_head:</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>        result.append(sorted_head.val)</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>        sorted_head <span class="op">=</span> sorted_head.<span class="bu">next</span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, result)  <span class="co"># Output: [1, 2, 3, 4]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-8" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-8">🔍 Walkthrough (Example)</h4>
+<ul>
+<li>Split: <code>4→2→1→3</code> → left: <code>4→2</code>, right: <code>1→3</code></li>
+<li>Recurse: <code>sort([4,2])</code> → split → <code>4</code> and <code>2</code> → merge → <code>2→4</code></li>
+<li>Recurse: <code>sort([1,3])</code> → merge → <code>1→3</code></li>
+<li>Merge <code>2→4</code> and <code>1→3</code>: compare → <code>1</code>, then <code>2</code>, <code>3</code>, <code>4</code> → <code>1→2→3→4</code></li>
+</ul>
+</section>
+<section id="complexity-9" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-9">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n log n)</li>
+<li><strong>Space:</strong> O(log n) due to recursion stack</li>
+</ul>
+</section>
+</section>
+<section id="palindrome-linked-list" class="level3">
+<h3 class="anchored" data-anchor-id="palindrome-linked-list">11. <a href="https://leetcode.com/problems/palindrome-linked-list/">Palindrome Linked List</a></h3>
+<section id="summary-10" class="level4">
+<h4 class="anchored" data-anchor-id="summary-10">📌 Summary</h4>
+<p>Check if a linked list reads the same forwards and backwards.</p>
+</section>
+<section id="patterns-10" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-10">🔗 Pattern(s)</h4>
+<ul>
+<li>Fast/Slow Pointers (find middle)</li>
+<li>Reverse Second Half</li>
+<li>Compare</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-10" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-10">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> isPalindrome(head):</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find middle using fast/slow</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    slow <span class="op">=</span> fast <span class="op">=</span> head</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> fast <span class="kw">and</span> fast.<span class="bu">next</span>:</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        slow <span class="op">=</span> slow.<span class="bu">next</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        fast <span class="op">=</span> fast.<span class="bu">next</span>.<span class="bu">next</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reverse second half</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    prev <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    curr <span class="op">=</span> slow</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> curr:</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        nxt <span class="op">=</span> curr.<span class="bu">next</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        curr.<span class="bu">next</span> <span class="op">=</span> prev</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        prev <span class="op">=</span> curr</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        curr <span class="op">=</span> nxt</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compare first half and reversed second half</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    left <span class="op">=</span> head</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    right <span class="op">=</span> prev  <span class="co"># now points to start of reversed second half</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> right:</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> left.val <span class="op">!=</span> right.val:</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>        left <span class="op">=</span> left.<span class="bu">next</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>        right <span class="op">=</span> right.<span class="bu">next</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,2,1]</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">1</span>))))</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check palindrome</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Is Palindrome:"</span>, isPalindrome(head))  <span class="co"># Output: True</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2]</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    head2 <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>))</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Is Palindrome:"</span>, isPalindrome(head2))  <span class="co"># Output: False</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-1-2" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-1-2">🔍 Walkthrough (Example 1)</h4>
+<ul>
+<li><code>slow</code> reaches node 2 (middle)</li>
+<li>Reverse second half: <code>2→1</code> becomes <code>1→2</code></li>
+<li>Compare: <code>1==1</code>, <code>2==2</code> → true</li>
+</ul>
+</section>
+<section id="complexity-10" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-10">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="reorder-list" class="level3">
+<h3 class="anchored" data-anchor-id="reorder-list">12. <a href="https://leetcode.com/problems/reorder-list/">Reorder List</a></h3>
+<section id="summary-11" class="level4">
+<h4 class="anchored" data-anchor-id="summary-11">📌 Summary</h4>
+<p>Reorder a list: L₀→L₁→…→Lₙ₋₁→Lₙ → L₀→Lₙ→L₁→Lₙ₋₁→…</p>
+</section>
+<section id="patterns-11" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-11">🔗 Pattern(s)</h4>
+<ul>
+<li>Fast/Slow (find mid)</li>
+<li>Reverse Second Half</li>
+<li>Merge Alternating</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-11" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-11">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reorderList(head):</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> head <span class="kw">or</span> <span class="kw">not</span> head.<span class="bu">next</span>:</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find middle</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    slow <span class="op">=</span> fast <span class="op">=</span> head</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> fast <span class="kw">and</span> fast.<span class="bu">next</span>:</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        slow <span class="op">=</span> slow.<span class="bu">next</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        fast <span class="op">=</span> fast.<span class="bu">next</span>.<span class="bu">next</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reverse second half</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    prev <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    curr <span class="op">=</span> slow</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> curr:</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>        nxt <span class="op">=</span> curr.<span class="bu">next</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        curr.<span class="bu">next</span> <span class="op">=</span> prev</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        prev <span class="op">=</span> curr</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        curr <span class="op">=</span> nxt</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Now prev is head of reversed second half</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Merge first half and reversed second half</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    first <span class="op">=</span> head</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    second <span class="op">=</span> prev</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> second.<span class="bu">next</span>:</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Save next nodes</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>        tmp1 <span class="op">=</span> first.<span class="bu">next</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>        tmp2 <span class="op">=</span> second.<span class="bu">next</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Interleave</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        first.<span class="bu">next</span> <span class="op">=</span> second</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        second.<span class="bu">next</span> <span class="op">=</span> tmp1</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Move forward</span></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>        first <span class="op">=</span> tmp1</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        second <span class="op">=</span> tmp2</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4]</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>))))</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>    reorderList(head)</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [1,4,2,3]</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> head:</span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>        result.append(head.val)</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>        head <span class="op">=</span> head.<span class="bu">next</span></span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, result)  <span class="co"># Output: [1, 4, 2, 3]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-9" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-9">🔍 Walkthrough (Example)</h4>
+<ul>
+<li><code>slow</code> at <code>3</code>, <code>fast</code> at <code>4</code></li>
+<li>Reverse second half: <code>3→4</code> → <code>4→3</code></li>
+<li>Merge: <code>1→4→2→3</code></li>
+<li><code>second.next</code> is <code>None</code> after <code>4→3</code>, so loop stops.</li>
+</ul>
+</section>
+<section id="complexity-11" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-11">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="rotate-list" class="level3">
+<h3 class="anchored" data-anchor-id="rotate-list">13. <a href="https://leetcode.com/problems/rotate-list/">Rotate List</a></h3>
+<section id="summary-12" class="level4">
+<h4 class="anchored" data-anchor-id="summary-12">📌 Summary</h4>
+<p>Rotate a linked list to the right by k places.</p>
+</section>
+<section id="patterns-12" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-12">🔗 Pattern(s)</h4>
+<ul>
+<li>Two Pointers + Modular Arithmetic</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-12" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-12">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rotateRight(head, k):</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> head <span class="kw">or</span> <span class="kw">not</span> head.<span class="bu">next</span>:</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> head</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Step 1: Get length and find tail</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    length <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    tail <span class="op">=</span> head</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> tail.<span class="bu">next</span>:</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        tail <span class="op">=</span> tail.<span class="bu">next</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        length <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Step 2: Normalize k</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    k <span class="op">%=</span> length</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> k <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> head  <span class="co"># no rotation needed</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Step 3: Find new tail (k steps from end)</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># So we want to stop at length - k - 1</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    new_tail <span class="op">=</span> head</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(length <span class="op">-</span> k <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        new_tail <span class="op">=</span> new_tail.<span class="bu">next</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Step 4: New head is next of new_tail</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    new_head <span class="op">=</span> new_tail.<span class="bu">next</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Step 5: Break and reconnect</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    new_tail.<span class="bu">next</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    tail.<span class="bu">next</span> <span class="op">=</span> head  <span class="co"># connect old tail to old head</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> new_head</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4,5], k = 2</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>, ListNode(<span class="dv">5</span>)))))</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Rotate right by 2</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>    rotated <span class="op">=</span> rotateRight(head, <span class="dv">2</span>)</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [4,5,1,2,3]</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> rotated:</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>        result.append(rotated.val)</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>        rotated <span class="op">=</span> rotated.<span class="bu">next</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, result)  <span class="co"># Output: [4, 5, 1, 2, 3]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-10" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-10">🔍 Walkthrough (Example)</h4>
+<ul>
+<li>Length = 5, <code>k=2</code>, so effective <code>k=2</code></li>
+<li>New tail at position <code>5-2-1 = 2</code> → node <code>3</code></li>
+<li>New head = <code>4</code></li>
+<li>Break: <code>3.next = None</code></li>
+<li>Connect <code>tail(5)</code> to <code>head(1)</code></li>
+<li>Result: <code>4→5→1→2→3</code></li>
+</ul>
+</section>
+<section id="complexity-12" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-12">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+<section id="reverse-nodes-in-k-group" class="level3">
+<h3 class="anchored" data-anchor-id="reverse-nodes-in-k-group">14. <a href="https://leetcode.com/problems/reverse-nodes-in-k-group/">Reverse Nodes in k-Group</a></h3>
+<section id="summary-13" class="level4">
+<h4 class="anchored" data-anchor-id="summary-13">📌 Summary</h4>
+<p>Reverse every k nodes in groups. If fewer than k remain, leave them unchanged.</p>
+</section>
+<section id="patterns-13" class="level4">
+<h4 class="anchored" data-anchor-id="patterns-13">🔗 Pattern(s)</h4>
+<ul>
+<li>Pointer Rewiring + Dummy Node + Reversing Sublist</li>
+</ul>
+</section>
+<section id="solution-with-inline-comments-13" class="level4">
+<h4 class="anchored" data-anchor-id="solution-with-inline-comments-13">✅ Solution with Inline Comments</h4>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListNode:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, val<span class="op">=</span><span class="dv">0</span>, <span class="bu">next</span><span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">next</span> <span class="op">=</span> <span class="bu">next</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reverseKGroup(head, k):</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Dummy node to simplify</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    dummy <span class="op">=</span> ListNode(<span class="dv">0</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    dummy.<span class="bu">next</span> <span class="op">=</span> head</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    prev_group_end <span class="op">=</span> dummy</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Find kth node from prev_group_end</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        kth <span class="op">=</span> prev_group_end</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(k):</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>            kth <span class="op">=</span> kth.<span class="bu">next</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> kth:</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> dummy.<span class="bu">next</span>  <span class="co"># Less than k nodes left</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Next group's start</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>        next_group_start <span class="op">=</span> kth.<span class="bu">next</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reverse the k nodes between prev_group_end and kth</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># We'll reverse from prev_group_end.next to kth</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>        current <span class="op">=</span> prev_group_end.<span class="bu">next</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>        prev <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> current <span class="op">!=</span> next_group_start:</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>            temp <span class="op">=</span> current.<span class="bu">next</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>            current.<span class="bu">next</span> <span class="op">=</span> prev</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>            prev <span class="op">=</span> current</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>            current <span class="op">=</span> temp</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Link reversed group</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Old head now points to next group</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>        prev_group_end.<span class="bu">next</span>.<span class="bu">next</span> <span class="op">=</span> next_group_start  </span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>        <span class="co"># New head is kth</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>        prev_group_end.<span class="bu">next</span> <span class="op">=</span> kth  </span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Move to next group</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Jump to start of next group</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>        prev_group_end <span class="op">=</span> prev_group_end.<span class="bu">next</span>.<span class="bu">next</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Official LeetCode Example ----</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Example Input: head = [1,2,3,4,5], k = 2</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>    head <span class="op">=</span> ListNode(<span class="dv">1</span>, ListNode(<span class="dv">2</span>, ListNode(<span class="dv">3</span>, ListNode(<span class="dv">4</span>, ListNode(<span class="dv">5</span>)))))</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reverse in groups of 2</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> reverseKGroup(head, <span class="dv">2</span>)</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Output: [2,1,4,3,5]</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>    output <span class="op">=</span> []</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> result:</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>        output.append(result.val)</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> result.<span class="bu">next</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Output:"</span>, output)  <span class="co"># Output: [2, 1, 4, 3, 5]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="walkthrough-example-11" class="level4">
+<h4 class="anchored" data-anchor-id="walkthrough-example-11">🔍 Walkthrough (Example)</h4>
+<ul>
+<li>Group 1: <code>1→2</code> → reverse → <code>2→1</code></li>
+<li><code>prev_group_end.next = 2</code>, <code>1.next = 4</code></li>
+<li>Group 2: <code>3→4</code> → reverse → <code>4→3</code></li>
+<li><code>3.next = 5</code></li>
+<li>Remaining <code>5</code> → untouched</li>
+<li>Final: <code>2→1→4→3→5</code></li>
+</ul>
+</section>
+<section id="complexity-13" class="level4">
+<h4 class="anchored" data-anchor-id="complexity-13">⏱️ Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(n)</li>
+<li><strong>Space:</strong> O(1)</li>
+</ul>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
