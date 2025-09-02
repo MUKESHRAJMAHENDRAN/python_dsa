@@ -1926,8 +1926,15 @@ You can generalize this idea to other similar problems:
 
 ### 7. [Swap Nodes in Pairs](https://leetcode.com/problems/swap-nodes-in-pairs/)
 
-#### 📌 Summary
-Swap every two adjacent nodes in a linked list.
+#### 🔗 **Problem Recap:**
+We are given a singly linked list. We need to **swap every two adjacent nodes**, i.e., swap (1st and 2nd), (3rd and 4th), etc., and return the new head.
+
+For input:  
+`1 → 2 → 3 → 4`  
+Expected output:  
+`2 → 1 → 4 → 3`
+
+We must **swap nodes**, not just values.
 
 #### 🔗 Pattern(s)
 - Pointer Rewiring + Dummy Node
@@ -1979,17 +1986,180 @@ if __name__ == "__main__":
     print("Output:", result)  # Output: [2, 1, 4, 3]
 ```
 
-#### 🔍 Walkthrough (Example)
-- `prev=dummy`, `first=1`, `second=2`
-- Swap: `dummy → 2 → 1 → 3 → 4`
-- Move `prev=1`
-- Next pair: `first=3`, `second=4`
-- Swap: `1 → 4 → 3 → None`
-- Final: `2 → 1 → 4 → 3`
 
-#### ⏱️ Complexity
-- **Time:** O(n)
-- **Space:** O(1)
+---
+
+### ✅ **Code Overview**
+
+```python
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+```
+This defines a node in a singly linked list.
+
+```python
+def swapPairs(head):
+    dummy = ListNode(0)
+    dummy.next = head
+    prev = dummy
+```
+- We create a **dummy node** pointing to the head. This simplifies edge cases (like swapping the first pair).
+- `prev` is a pointer that always points to the node **before** the current pair we're about to swap.
+
+---
+
+### 🔁 **Main Loop: Swapping in Pairs**
+
+```python
+while prev.next and prev.next.next:
+```
+We can only swap if there are **at least two nodes** after `prev`.
+
+Inside the loop:
+
+```python
+first = prev.next
+second = first.next
+```
+We identify the two nodes to swap:
+- `first`: first node of the pair
+- `second`: second node of the pair
+
+#### 🔄 **Now perform the swap:**
+
+```python
+prev.next = second  # prev now points to second
+# first skips second and points to whatever comes after
+first.next = second.next  
+second.next = first # second now points to first → completes the swap
+```
+
+After this:
+```
+Before:   prev → first → second → X
+After:    prev → second → first → X
+```
+
+So the pair is swapped.
+
+Then:
+```python
+prev = first  # Move prev forward by two nodes
+```
+Why `first`? Because after swapping:
+- `first` is now the **second** node in the new order.
+- So `prev = first` sets us up to process the next pair after this one.
+
+---
+
+### 🧠 **Step-by-Step Example: `1→2→3→4`**
+
+Initial state:
+```
+dummy → 1 → 2 → 3 → 4
+prev
+```
+
+#### 🔁 **First Iteration: Swap 1 and 2**
+
+- `first = 1`, `second = 2`
+- `prev.next = second` → dummy → 2 ...
+- `first.next = second.next` → 1 → 3
+- `second.next = first` → 2 → 1
+Now:
+```
+dummy → 2 → 1 → 3 → 4
+```
+Then: `prev = first` → `prev = 1`
+
+```
+dummy → 2 → 1 → 3 → 4
+             prev
+```
+
+#### 🔁 **Second Iteration: Swap 3 and 4**
+
+- `first = 3`, `second = 4`
+- `prev.next = second` → 1 → 4
+- `first.next = second.next` → 3 → None (since 4.next is None)
+- `second.next = first` → 4 → 3
+
+Now:
+```
+dummy → 2 → 1 → 4 → 3
+```
+Then: `prev = first = 3`
+
+Now `prev.next` is `None`, so loop ends.
+
+---
+
+### 🏁 **Return Result**
+
+```python
+return dummy.next
+```
+Return the new head: `2 → 1 → 4 → 3`
+
+---
+
+### 🖨️ Output Code
+
+```python
+result = []
+while swapped:
+    result.append(swapped.val)
+    swapped = swapped.next
+print("Output:", result)
+```
+
+This traverses the list and collects values:
+- `swapped` starts at `2`
+- Then `1`, `4`, `3`
+- Output: `[2, 1, 4, 3]` ✅
+
+---
+
+### 📌 Key Insights
+
+| Concept | Why It Matters |
+|-------|----------------|
+| **Dummy Node** | Handles edge case when head is swapped (no need for special logic) |
+| **prev pointer** | Always points to node before the pair; makes re-linking easy |
+| **Swapping nodes** | Not just values — actual pointers are changed |
+| **Move prev = first** | After swap, `first` is now the second node in the pair, so next pair starts after it |
+
+---
+
+### 🚫 Edge Cases Handled
+
+- Empty list (`head = None`) → returns `None`
+- Single node → no swap, returns same
+- Odd-length list → last node remains unswapped
+
+Example: `1→2→3` becomes `2→1→3`
+
+---
+
+### ✅ Final Thoughts
+
+This algorithm runs in:
+- **Time:** O(n) — each node visited once
+- **Space:** O(1) — only a few pointers used
+
+It’s an elegant and efficient solution commonly used in LeetCode and interviews.
+
+---
+
+### 💡 Tip for Interviews
+
+You can briefly explain:
+> "I use a dummy node to simplify pointer manipulation. Then, for every pair, I relink the previous node to the second node, then rewire the two nodes in reverse, and move forward by two nodes."
+
+---
+
 
 ### 8. [Odd Even Linked List](https://leetcode.com/problems/odd-even-linked-list/)
 
@@ -2061,19 +2231,185 @@ if __name__ == "__main__":
     print("Output:", result)  # Output: [1, 3, 5, 2, 4]
 ```
 
-#### 🔍 Walkthrough (Example)
-- `curr=1` (odd): attach to `odd_curr`, `odd_curr=1`
-- `curr=2` (even): attach to `even_curr`, `even_curr=2`
-- `curr=3` (odd): `odd_curr=3`
-- `curr=4` (even): `even_curr=4`
-- `curr=5` (odd): `odd_curr=5`
-- Now: `odd_list = 1→3→5`, `even_list = 2→4`
-- Link: `5.next = 2`
-- Final: `1→3→5→2→4`
+Let's walk through the provided Python code step by step, focusing on how the `swapPairs` function works to **swap every two adjacent nodes** in a linked list.
 
-#### ⏱️ Complexity
-- **Time:** O(n)
-- **Space:** O(1)
+---
+
+### 🔗 **Problem Recap:**
+We are given a singly linked list. We need to **swap every two adjacent nodes**, i.e., swap (1st and 2nd), (3rd and 4th), etc., and return the new head.
+
+For input:  
+`1 → 2 → 3 → 4`  
+Expected output:  
+`2 → 1 → 4 → 3`
+
+We must **swap nodes**, not just values.
+
+---
+
+### ✅ **Code Overview**
+
+```python
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+```
+This defines a node in a singly linked list.
+
+```python
+def swapPairs(head):
+    dummy = ListNode(0)
+    dummy.next = head
+    prev = dummy
+```
+- We create a **dummy node** pointing to the head. This simplifies edge cases (like swapping the first pair).
+- `prev` is a pointer that always points to the node **before** the current pair we're about to swap.
+
+---
+
+### 🔁 **Main Loop: Swapping in Pairs**
+
+```python
+while prev.next and prev.next.next:
+```
+We can only swap if there are **at least two nodes** after `prev`.
+
+Inside the loop:
+
+```python
+first = prev.next
+second = first.next
+```
+We identify the two nodes to swap:
+- `first`: first node of the pair
+- `second`: second node of the pair
+
+#### 🔄 **Now perform the swap:**
+
+```python
+prev.next = second           # prev now points to second
+first.next = second.next     # first skips second and points to whatever comes after
+second.next = first          # second now points to first → completes the swap
+```
+
+After this:
+```
+Before:   prev → first → second → X
+After:    prev → second → first → X
+```
+
+So the pair is swapped.
+
+Then:
+```python
+prev = first  # Move prev forward by two nodes
+```
+Why `first`? Because after swapping:
+- `first` is now the **second** node in the new order.
+- So `prev = first` sets us up to process the next pair after this one.
+
+---
+
+### 🧠 **Step-by-Step Example: `1→2→3→4`**
+
+Initial state:
+```
+dummy → 1 → 2 → 3 → 4
+prev
+```
+
+#### 🔁 **First Iteration: Swap 1 and 2**
+
+- `first = 1`, `second = 2`
+- `prev.next = second` → dummy → 2 ...
+- `first.next = second.next` → 1 → 3
+- `second.next = first` → 2 → 1
+Now:
+```
+dummy → 2 → 1 → 3 → 4
+```
+Then: `prev = first` → `prev = 1`
+
+```
+dummy → 2 → 1 → 3 → 4
+             prev
+```
+
+#### 🔁 **Second Iteration: Swap 3 and 4**
+
+- `first = 3`, `second = 4`
+- `prev.next = second` → 1 → 4
+- `first.next = second.next` → 3 → None (since 4.next is None)
+- `second.next = first` → 4 → 3
+
+Now:
+```
+dummy → 2 → 1 → 4 → 3
+```
+Then: `prev = first = 3`
+
+Now `prev.next` is `None`, so loop ends.
+
+---
+
+### 🏁 **Return Result**
+
+```python
+return dummy.next
+```
+Return the new head: `2 → 1 → 4 → 3`
+
+---
+
+### 🖨️ Output Code
+
+```python
+result = []
+while swapped:
+    result.append(swapped.val)
+    swapped = swapped.next
+print("Output:", result)
+```
+
+This traverses the list and collects values:
+- `swapped` starts at `2`
+- Then `1`, `4`, `3`
+- Output: `[2, 1, 4, 3]` ✅
+
+---
+
+### 📌 Key Insights
+
+| Concept | Why It Matters |
+|-------|----------------|
+| **Dummy Node** | Handles edge case when head is swapped (no need for special logic) |
+| **prev pointer** | Always points to node before the pair; makes re-linking easy |
+| **Swapping nodes** | Not just values — actual pointers are changed |
+| **Move prev = first** | After swap, `first` is now the second node in the pair, so next pair starts after it |
+
+---
+
+### 🚫 Edge Cases Handled
+
+- Empty list (`head = None`) → returns `None`
+- Single node → no swap, returns same
+- Odd-length list → last node remains unswapped
+
+Example: `1→2→3` becomes `2→1→3`
+
+---
+
+### ✅ Final Thoughts
+
+This algorithm runs in:
+- **Time:** O(n) — each node visited once
+- **Space:** O(1) — only a few pointers used
+
+It’s an elegant and efficient solution commonly used in LeetCode and interviews.
+
+---
+
 
 ### 9. [Add Two Numbers](https://leetcode.com/problems/add-two-numbers/)
 
