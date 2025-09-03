@@ -264,14 +264,28 @@ Now both heaps differ in size by only 1 → good.
 
 ## 3. [Merge k Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists/)
 
-### 📝 Problem Summary
-Given k linked lists, each sorted in ascending order, merge them into one sorted list.
+### 🔹 Problem Statement
 
-### 🔍 Pattern
-- **Heap / Priority Queue** (k-way merge)
-- At each step, pick the smallest head from k lists
+You are given an array of `k` linked lists, each of which is sorted in ascending order.
 
-### ✅ Solution with Inline Comments
+Merge all the lists into one sorted linked list and return it.
+
+> **Constraints:**
+> - `k == lists.length`
+> - `0 <= k <= 10^4`
+> - `0 <= lists[i].length <= 500`
+> - `-10^4 <= lists[i][j] <= 10^4`
+> - All lists are sorted in non-decreasing order.
+
+### ✅ Example:
+```python
+Input: lists = [[1,4,5],[1,3,4],[2,6]]
+Output: [1,1,2,3,4,4,5,6]
+```
+
+---
+
+## ✅ Solution: Min-Heap Approach (Optimal)
 
 ```python
 import heapq
@@ -283,782 +297,388 @@ class ListNode:
         self.val = val
         self.next = next
 
-def mergeKLists(lists: List[Optional[ListNode]]) -> Optional[ListNode]:
-    # Create a dummy head to simplify list construction
-    dummy = ListNode(0)
-    current = dummy
-    
-    # Min-heap to store (value, node) pairs
-    heap = []
-    
-    # Initialize heap with the first node of each non-empty list
-    for lst in lists:
-        if lst:
-            heapq.heappush(heap, (lst.val, lst))
-    
-    # While there are nodes in the heap
-    while heap:
-        # Pop the smallest element
-        val, node = heapq.heappop(heap)
+class Solution:
+    def mergeKLists(self, lists: List[Optional[ListNode]]):
+        # Step 1: Create a min-heap to store (value, index, node)
+        heap = []
         
-        # Link it to the result list
-        current.next = node
-        current = current.next
+        # Step 2: Push the head of each non-empty list into the heap
+        for i, lst in enumerate(lists):
+            if lst:  # Skip empty lists
+                heapq.heappush(heap, (lst.val, i, lst))
         
-        # If this node has a next, push it into the heap
-        if node.next:
-            heapq.heappush(heap, (node.next.val, node.next))
-    
-    # Return the merged list (skip dummy)
-    return dummy.next
-
-
-# ---- Official LeetCode Example ----
-if __name__ == "__main__":
-    # Example Input: lists = [[1,4,5],[1,3,4],[2,6]]
-    # Build linked lists
-    l1 = ListNode(1, ListNode(4, ListNode(5)))
-    l2 = ListNode(1, ListNode(3, ListNode(4)))
-    l3 = ListNode(2, ListNode(6))
-    
-    lists = [l1, l2, l3]
-    
-    # Call function
-    merged = mergeKLists(lists)
-    
-    # Print Output: [1,1,2,3,4,4,5,6]
-    result = []
-    while merged:
-        result.append(merged.val)
-        merged = merged.next
-    print("Output:", result)  # Output: [1, 1, 2, 3, 4, 4, 5, 6]
+        # Step 3: Dummy node to simplify result construction
+        dummy = ListNode(0)
+        current = dummy
+        
+        # Step 4: While heap is not empty, extract smallest and add to result
+        while heap:
+            # Pop the smallest element: (val, index, node)
+            val, idx, node = heapq.heappop(heap)
+            
+            # Add this node to the result list
+            current.next = node
+            current = current.next
+            
+            # If the node has a next, push it back into the heap
+            if node.next:
+                heapq.heappush(heap, (node.next.val, idx, node.next))
+        
+        # Step 5: Return the merged list (skip dummy head)
+        return dummy.next
 ```
-
-Let's walk through your **LeetCode "Merge k Sorted Lists"** code step by step, explaining how it works and why each part is important.
 
 ---
 
-### 🔍 **Problem Overview**
-You are given `k` sorted linked lists and need to merge them into one sorted linked list.
+## 🔍 Code Walkthrough with Example
 
-#### Example Input:
+### Input:
 ```python
 lists = [
-    [1, 4, 5],
-    [1, 3, 4],
-    [2, 6]
+    [1 → 4 → 5],   # list 0
+    [1 → 3 → 4],   # list 1
+    [2 → 6]        # list 2
 ]
 ```
 
-#### Expected Output:
+We’ll simulate every step.
+
+### 🔹 Initial Setup
+
+- `heap = []`
+- `dummy = ListNode(0)`
+- `current = dummy`
+
+---
+
+### 🔹 Step 1: Push Heads into Heap
+
+Loop over `lists`:
+
+| `i` | `lst` | `lst.val` | Pushed? | Tuple |
+|-----|-------|-----------|---------|--------|
+| 0 | `nodeA` (1) | 1 | Yes | `(1, 0, nodeA)` |
+| 1 | `nodeD` (1) | 1 | Yes | `(1, 1, nodeD)` |
+| 2 | `nodeG` (2) | 2 | Yes | `(2, 2, nodeG)` |
+
+Now:
 ```python
-[1, 1, 2, 3, 4, 4, 5, 6]
+heap = [(1, 0, nodeA), (1, 1, nodeD), (2, 2, nodeG)]
+```
+
+> Heap maintains min-heap property: smallest value first. Ties broken by index.
+
+---
+
+### 🔹 Iteration 1: Pop `(1, 0, nodeA)`
+
+- `val = 1`, `idx = 0`, `node = nodeA`
+- `current.next = nodeA` → result: `[1]`
+- `current = nodeA`
+- `nodeA.next = nodeB` → push `(4, 0, nodeB)`
+
+Heap now:
+```python
+[(1, 1, nodeD), (2, 2, nodeG), (4, 0, nodeB)]
 ```
 
 ---
 
-## ✅ Code Walkthrough
+### 🔹 Iteration 2: Pop `(1, 1, nodeD)`
 
-### 1. **Define the ListNode Class**
+- Add `nodeD` → result: `[1, 1]`
+- Push `nodeE` (value 3) → `(3, 1, nodeE)`
 
+Heap:
 ```python
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
+[(2, 2, nodeG), (3, 1, nodeE), (4, 0, nodeB)]
 ```
 
-- This defines a node in a singly-linked list.
-- Each node has a `val` (value) and a `next` pointer to the next node.
-- If `next` is `None`, it’s the end of the list.
-
-> 📌 Example: `ListNode(1, ListNode(4, ListNode(5)))` creates:  
-> `1 → 4 → 5 → None`
-
 ---
 
-### 2. **Main Function: `mergeKLists`**
+### 🔹 Iteration 3: Pop `(2, 2, nodeG)`
 
+- Add `nodeG` → result: `[1, 1, 2]`
+- Push `nodeH` (value 6) → `(6, 2, nodeH)`
+
+Heap:
 ```python
-def mergeKLists(lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+[(3, 1, nodeE), (4, 0, nodeB), (6, 2, nodeH)]
 ```
 
-- Takes a list of `k` linked lists (`lists`) as input.
-- Returns a single merged sorted linked list.
-
 ---
 
-### 3. **Create Dummy Head**
+### 🔹 Iteration 4: Pop `(3, 1, nodeE)`
 
+- Add `nodeE` → result: `[1, 1, 2, 3]`
+- Push `nodeF` (value 4) → `(4, 1, nodeF)`
+
+Heap:
 ```python
-dummy = ListNode(0)
-current = dummy
+[(4, 0, nodeB), (4, 1, nodeF), (6, 2, nodeH)]
 ```
 
-- A **dummy head** is used to simplify the logic of building the result list.
-- `dummy` acts as a placeholder so we don’t have to handle edge cases like empty result or setting the first node specially.
-- `current` points to the current end of the result list — we’ll append new nodes here.
-
-> 🎯 Why? Because we can always return `dummy.next`, which skips the dummy node.
+> Two `4`s → pick `(4, 0, nodeB)` because `0 < 1`
 
 ---
 
-### 4. **Initialize Min-Heap**
+### 🔹 Iteration 5: Pop `(4, 0, nodeB)`
 
+- Add `nodeB` → result: `[1, 1, 2, 3, 4]`
+- Push `nodeC` (value 5) → `(5, 0, nodeC)`
+
+Heap:
 ```python
-heap = []
+[(4, 1, nodeF), (5, 0, nodeC), (6, 2, nodeH)]
 ```
 
-- We'll use a **min-heap** to efficiently get the smallest value among the current heads of all non-empty lists.
-
-> 💡 Heap stores tuples: `(value, node)`  
-> Python’s `heapq` compares the first element of the tuple, then second if needed.
-
 ---
 
-### 5. **Push First Nodes into Heap**
+### 🔹 Iteration 6: Pop `(4, 1, nodeF)`
 
+- Add `nodeF` → result: `[1, 1, 2, 3, 4, 4]`
+- No `next` → don’t push
+
+Heap:
 ```python
-for lst in lists:
-    if lst:
-        heapq.heappush(heap, (lst.val, lst))
+[(5, 0, nodeC), (6, 2, nodeH)]
 ```
 
-- Loop over each list in `lists`.
-- If the list is not empty (`lst` exists), push its **first node** (`lst`) into the heap with its value.
-- So after this loop:
-  - Heap contains: `(1, l1_head)`, `(1, l2_head)`, `(2, l3_head)`
-  - The smallest values are at the top.
-
-> ⚠️ Important: We store the **node**, not just the value, so we can later access `node.next`.
-
 ---
 
-### 6. **Main Loop: While Heap Is Not Empty**
+### 🔹 Iteration 7: Pop `(5, 0, nodeC)`
 
+- Add `nodeC` → result: `[1, 1, 2, 3, 4, 4, 5]`
+- No `next` → stop
+
+Heap:
 ```python
-while heap:
-    val, node = heapq.heappop(heap)
+[(6, 2, nodeH)]
 ```
 
-- Extract the smallest element from the heap (based on `val`).
-- Now `node` is the next node to add to our result list.
-
 ---
 
-### 7. **Link Node to Result List**
+### 🔹 Iteration 8: Pop `(6, 2, nodeH)`
 
-```python
-current.next = node
-current = current.next
-```
-
-- Attach the selected node to the end of the result list.
-- Move `current` forward to point to this new node.
-
-> 🔗 After this, `current` tracks where the next node should be added.
-
----
-
-### 8. **Add Next Node from Same List (if exists)**
-
-```python
-if node.next:
-    heapq.heappush(heap, (node.next.val, node.next))
-```
-
-- If the current node has a `next`, push that next node into the heap.
-- This ensures we keep track of the next available node from the same list.
-
-> 🔁 This maintains the invariant: heap always holds the **current head** of each non-empty list.
-
----
-
-### 9. **Return Merged List**
-
-```python
-return dummy.next
-```
-
-- Return the real start of the merged list (skip the dummy node).
-
----
-
-## 🔄 Step-by-Step Execution (Example)
-
-Given:
-```python
-l1 = 1 → 4 → 5
-l2 = 1 → 3 → 4
-l3 = 2 → 6
-```
-
-### Initial State:
-- `heap = [(1, l1), (1, l2), (2, l3)]`
-- `dummy → ?`, `current → dummy`
-
----
-
-### Iteration 1:
-- Pop `(1, l1)` → add `l1` to result.
-- `l1.next = 4`, so push `(4, l1.next)` into heap.
-- Now heap: `[(1, l2), (2, l3), (4, l1.next)]`
-- Result: `dummy → 1`
-
----
-
-### Iteration 2:
-- Pop `(1, l2)` → add `l2` to result.
-- `l2.next = 3`, push `(3, l2.next)` into heap.
-- Heap: `[(2, l3), (3, l2.next), (4, l1.next)]`
-- Result: `dummy → 1 → 1`
-
----
-
-### Iteration 3:
-- Pop `(2, l3)` → add `l3` to result.
-- `l3.next = 6`, push `(6, l3.next)` into heap.
-- Heap: `[(3, l2.next), (4, l1.next), (6, l3.next)]`
-- Result: `... → 2`
-
----
-
-### Iteration 4:
-- Pop `(3, l2.next)` → add it.
-- `l2.next.next = 4`, push `(4, l2.next.next)`
-- Heap: `[(4, l1.next), (4, l2.next.next), (6, l3.next)]`
-- Result: `... → 3`
-
----
-
-### Iteration 5:
-- Pop `(4, l1.next)` → add it.
-- `l1.next.next = 5`, push `(5, l1.next.next)`
-- Heap: `[(4, l2.next.next), (5, l1.next.next), (6, l3.next)]`
-- Result: `... → 4`
-
----
-
-### Iteration 6:
-- Pop `(4, l2.next.next)` → add it.
-- No more next, so nothing pushed.
-- Heap: `[(5, l1.next.next), (6, l3.next)]`
-- Result: `... → 4`
-
----
-
-### Iteration 7:
-- Pop `(5, l1.next.next)` → add it.
-- No next, so no push.
-- Heap: `[(6, l3.next)]`
-- Result: `... → 5`
-
----
-
-### Iteration 8:
-- Pop `(6, l3.next)` → add it.
+- Add `nodeH` → result: `[1, 1, 2, 3, 4, 4, 5, 6]`
 - Done!
-- Heap is empty.
 
-Final Result:
+---
+
+### ✅ Final Result
+
+Return `dummy.next` → the full merged list:
 ```
 1 → 1 → 2 → 3 → 4 → 4 → 5 → 6
 ```
 
-✅ Correct!
+✅ Output: `[1,1,2,3,4,4,5,6]`
 
 ---
 
-## 🧠 Key Concepts & Optimizations
+## ⏱️ Time & Space Complexity
 
-| Feature | Purpose |
-|-------|--------|
-| **Min-Heap** | Efficiently find the smallest current head across `k` lists in O(log k) time |
-| **Dummy Node** | Avoid special handling for first node |
-| **Heap Stores Nodes** | Allows us to access `.next` and continue traversal |
-| **Time Complexity** | O(N log k), where N = total number of nodes, k = number of lists |
-| **Space Complexity** | O(k) for the heap |
+| Metric | Complexity | Explanation |
+|-------|------------|-------------|
+| **Time** | `O(n log k)` | - `n` = total number of nodes<br>- Each node is pushed and popped once → `n` operations<br>- Each heap op takes `O(log k)`<br>- Total: `O(n log k)` |
+| **Space** | `O(k)` | - Heap stores at most `k` elements (one per list)<br>- `dummy` and pointers: `O(1)`<br>- Output list not counted |
 
----
-
-## ✅ Final Output
-
-```python
-Output: [1, 1, 2, 3, 4, 4, 5, 6]
-```
-
-This matches the expected result perfectly.
+> ✅ Efficient even for large `k` (e.g., 1000 lists)
 
 ---
 
-## 📝 Summary
+## ✅ Key Takeaways (Revision Notes)
 
-Your implementation is **correct, efficient, and well-structured**! It uses the standard optimal approach for merging k sorted linked lists:
+| Concept | Why It Matters |
+|--------|----------------|
+| **Min-Heap** | Always gives smallest current head in `O(log k)` |
+| **Tuple `(val, idx, node)`** | Prevents errors when values are equal; tiebreaker via `idx` |
+| **Dummy Node** | Avoids edge cases when building result list |
+| **One Pass Per Node** | Each node inserted and removed exactly once |
+| **Heap Size ≤ k** | Memory efficient — only keeps front nodes |
 
-> ✅ Use a min-heap to always pick the smallest available node  
-> ✅ Advance only one list at a time  
-> ✅ Build result incrementally using a dummy head
+---
 
-Great job! 👏
+## 🚀 Pro Tips for Interviews
 
-Let me know if you'd like a version with comments, visualization, or comparison to other approaches (like divide-and-conquer).
-
-### ⏱️ Complexity
-- **Time**: O(N log k), where N = total nodes, k = number of lists
-- **Space**: O(k) — heap holds at most k nodes
+1. **Always use `(val, idx, node)`** — never compare `ListNode` directly!
+2. **Handle empty lists** (`if lst`) — avoid `None` errors.
+3. **Use `heapq`** — Python’s built-in min-heap is perfect.
+4. **Draw the heap evolution** on paper during interviews.
+5. **Explain the logic clearly**: “We always pick the smallest available head.”
 
 ---
 
 ## 4. [Task Scheduler](https://leetcode.com/problems/task-scheduler/)
 
-The **"Task Scheduler"** problem on LeetCode (Problem #621) is a popular algorithm challenge that tests greedy thinking and efficient use of data structures. Below is a detailed editorial-style explanation of the optimal solution.
+#### 📌 Problem Statement
+
+You are given a characters array `tasks` representing tasks labeled from `'A'` to `'Z'`. Each task takes **one unit of time** to complete. You are also given an integer `n`, which represents the **cooldown period** between two identical tasks.
+
+You can only perform one task at a time. After performing a task, you must wait **exactly `n` units** before performing the same task again.
+
+Return the **minimum number of time units** needed to complete all tasks.
+
+> **Constraints:**
+> - `1 <= tasks.length <= 10⁴`
+> - `tasks[i]` is an uppercase English letter.
+> - `0 <= n <= 100`
 
 ---
 
-### 🔷 Problem: [Task Scheduler (LeetCode #621)](https://leetcode.com/problems/task-scheduler/)
+### ✅ Sample Input & Output
 
-**Problem Statement:**
-
-You are given a character array `tasks` representing the tasks a CPU needs to do, where each letter represents a different task. Tasks could be done in any order, but each task must be done in an interval of **at least `n` units** (where `n` is the cooling interval). Return the **least number of units of time** the CPU will take to finish all the tasks.
-
-**Example:**
-```
+```text
 Input: tasks = ["A","A","A","B","B","B"], n = 2
 Output: 8
-Explanation: 
-A -> B -> idle -> A -> B -> idle -> A -> B
+
+Explanation:
+One valid schedule is:
+Time:  0  1  2  3  4  5  6  7
+      [A, B, _, A, B, _, A, B]
 ```
+
+> ✅ All `A`s are separated by ≥ 2 units → valid  
+> ✅ All `B`s are separated by ≥ 2 units → valid  
+> ✅ Total time = 8 units
 
 ---
 
-### 🔍 Key Observations
-
-1. The only constraint is that **the same task cannot be scheduled within `n` units of time**.
-2. We can insert **idle cycles** or **other tasks** between two same tasks to satisfy the cooldown.
-3. The goal is to **minimize total time**, so we want to **minimize idle time**.
-
----
-
-### ✅ Strategy: Greedy with Math Insight
-
-We can solve this using a **greedy approach**:
-
-1. **Count frequency** of each task.
-2. Find the task with **maximum frequency**, say `maxFreq`.
-3. There will be `(maxFreq - 1)` full **blocks** of size `(n + 1)` between the most frequent task.
-   - For example, if `maxFreq = 3` and `n = 2`, we have:
-     ```
-     A _ _ A _ _ A
-     ```
-     → 2 gaps of size 2 → total block size = 3 per segment → 2 full segments of length (n+1) = 3
-4. Then, we **fill other tasks** into these gaps.
-5. Finally, **add the remaining tasks** that occur with the same max frequency.
-
----
-
-### 📌 Formula
-
-Let:
-- `maxFreq` = maximum frequency among tasks
-- `countMaxFreq` = number of tasks that have frequency = `maxFreq`
-
-Then, the **minimum time** required is:
-
-```
-result = max(
-    (maxFreq - 1) * (n + 1) + countMaxFreq,
-    total_tasks
-)
-```
-
-#### Why this formula?
-
-- `(maxFreq - 1) * (n + 1)` → number of slots taken by the most frequent task and its required cooldown.
-- `+ countMaxFreq` → the last occurrence of each task with max frequency comes after the last gap.
-- But if there are **so many different tasks** that they fill all idle slots, the total time is just `len(tasks)`.
-
-So we take the **maximum** of the two to ensure we don't underestimate.
-
----
-
-### 🧠 Example Walkthrough
-
-**Input:** `tasks = ["A","A","A","B","B","B"], n = 2`
-
-- Frequencies: A → 3, B → 3
-- `maxFreq = 3`, `countMaxFreq = 2` (both A and B appear 3 times)
-- Total tasks = 6
-
-Compute:
-```
-(3 - 1) * (2 + 1) + 2 = 2 * 3 + 2 = 6 + 2 = 8
-```
-Compare with total tasks: `max(8, 6) = 8`
-
-✅ Output: `8`
-
----
-
-### ✅ Code (Python)
+## ✅ Solution Code
 
 ```python
 from collections import Counter
+from typing import List
 
 class Solution:
     def leastInterval(self, tasks: List[str], n: int) -> int:
-        freq = Counter(tasks)
-        maxFreq = max(freq.values())
-        countMaxFreq = sum(1 for f in freq.values() if f == maxFreq)
+        """
+        Find the minimum time to schedule all tasks with cooldown n.
         
-        result = (maxFreq - 1) * (n + 1) + countMaxFreq
-        return max(result, len(tasks))
+        :param tasks: List of task labels (e.g., ['A','A','B','B'])
+        :param n: Cooldown period between identical tasks
+        :return: Minimum time units required
+        
+        Intuition:
+        - The most frequent task(s) determine the minimum time.
+        - We need to place max_freq tasks with 
+        - at least n other tasks/idle in between.
+        - If there are enough other tasks to fill gaps → no idle time needed.
+        """
+        
+        # Step 1: Count frequency of each task
+        task_count = Counter(tasks)
+        
+        # Step 2: Find the maximum frequency
+        max_freq = max(task_count.values())
+        
+        # Step 3: Count how many tasks have the maximum frequency
+        count_max_freq = sum(
+            1 for freq in task_count.values() if freq == max_freq
+            )
+        
+        # Step 4: Calculate minimum time using formula
+        # (max_freq - 1) full cycles of length (n + 1) each
+        # Plus the final instances of the most frequent tasks
+        min_time = (max_freq - 1) * (n + 1) + count_max_freq
+        
+        # Step 5: Return the maximum between min_time and total tasks
+        # Why? If there are enough other tasks to fill all slots,
+        # we don't need idle time → answer is just len(tasks)
+        return max(min_time, len(tasks))
 ```
-Absolutely! Let’s walk through the **mathematical solution** to the **Task Scheduler (LeetCode #621)** with a **detailed, step-by-step example** to build deep intuition.
 
 ---
 
-### 🧩 Problem Recap
+## 📌 Step-by-Step Walkthrough (Example)
 
-**Goal**: Find the **minimum time** to execute all tasks, given that:
-- Each task is a letter (e.g., `'A'`, `'B'`).
-- The same task must wait at least `n` units between executions.
-- You can interleave other tasks or insert **idle** slots.
+### 🔹 Input:
+```python
+tasks = ["A", "A", "A", "B", "B", "B"]
+n = 2
+```
+
+### 🔹 Step 1: Count Frequencies
+```python
+task_count = {'A': 3, 'B': 3}
+```
+
+### 🔹 Step 2: Max Frequency
+```python
+max_freq = 3
+```
+
+### 🔹 Step 3: Count Tasks with Max Frequency
+```python
+count_max_freq = 2  # Both A and B appear 3 times
+```
+
+### 🔹 Step 4: Apply Formula
+```python
+min_time = (3 - 1) * (2 + 1) + 2
+         = 2 * 3 + 2
+         = 6 + 2
+         = 8
+```
+
+### 🔹 Step 5: Compare with Total Tasks
+```python
+len(tasks) = 6
+return max(8, 6) = 8
+```
+
+✅ Answer: `8`
 
 ---
 
-### ✅ Mathematical Formula (Recap)
+## 🎯 Valid Schedule Visualization
 
-The answer is:
+| Time | Task |
+|------|------|
+| 0    | A    |
+| 1    | B    |
+| 2    | _    | ← Idle (to satisfy cooldown of 2)
+| 3    | A    |
+| 4    | B    |
+| 5    | _    | ← Idle
+| 6    | A    |
+| 7    | B    |
 
-```text
-result = max(
-    (maxFreq - 1) * (n + 1) + countMaxFreq,
-    total_tasks
-)
-```
+> ✅ Final output: `8` time units
 
-Where:
-- `maxFreq` = highest frequency of any task
-- `countMaxFreq` = number of tasks that have frequency = `maxFreq`
-- `total_tasks` = length of the `tasks` array
+Check cooldowns:
+- `A` at 0 → next at 3 → gap = 3 ≥ 3 → valid
+- `B` at 1 → next at 4 → gap = 3 ≥ 3 → valid
+- `A` at 3 → next at 6 → gap = 3 ≥ 3 → valid
+- `B` at 4 → next at 7 → gap = 3 ≥ 3 → valid
 
----
-
-### 🎯 Example 1: Classic Case
-
-**Input**:  
-`tasks = ["A","A","A","B","B","B"]`  
-`n = 2`
-
----
-
-### 🔍 Step 1: Count Frequencies
-
-| Task | Count |
-|------|-------|
-| A    | 3     |
-| B    | 3     |
-
-So:
-- `maxFreq = 3` → A and B both appear 3 times
-- `countMaxFreq = 2` → two tasks (A and B) have max frequency
-- `total_tasks = 6`
+All constraints satisfied!
 
 ---
 
-### 🔧 Step 2: Apply the Formula
+## ⏱️ Time Complexity
 
-We compute the **minimum required time due to the most frequent tasks**:
-
-```text
-(maxFreq - 1) * (n + 1) + countMaxFreq
-= (3 - 1) * (2 + 1) + 2
-= 2 * 3 + 2
-= 6 + 2
-= 8
-```
-
-Now compare with total number of tasks:
-
-```text
-max(8, 6) = 8
-```
-
-✅ **Answer = 8**
+- **O(m)** where `m = len(tasks)`
+  - One pass to build `Counter`: O(m)
+  - Finding `max()` and counting frequencies: O(26) ≈ O(1)
+- So overall: **O(m)**
 
 ---
 
-### 🖼️ Visual Schedule
+## 🧠 Space Complexity
 
-We schedule the most frequent tasks first (A and B), spaced at least `n=2` apart.
-
-We start with A:
-
-```
-A _ _ A _ _ A
-```
-
-Each `A` is 3 units apart → satisfies `n=2` cooldown.
-
-Now fill in `B` into the gaps:
-
-```
-A B _ A B _ A B
-```
-
-We used both B’s in the gaps. Final B at the end.
-
-No idle time left? Actually, we had to insert idle initially, but B filled most slots.
-
-But wait — we still have:
-
-```
-Time:  1   2   3   4   5   6   7   8
-      [A] [B] [idle] [A] [B] [idle] [A] [B]
-```
-
-Wait — actually, we can do better:
-
-```
-1: A
-2: B
-3: idle
-4: A
-5: B
-6: idle
-7: A
-8: B
-```
-
-Yes → 8 units.
-
-We **can’t do better** because A needs to run 3 times with 2 gaps of at least 2 → forces structure.
-
-So **8 is optimal**.
+- **O(1)** because:
+  - The `Counter` stores at most 26 keys (letters A–Z)
+  - No additional data structures grow with input size
+- Thus, space used is constant regardless of input size
 
 ---
 
-### 🎯 Example 2: Many Unique Tasks (No Idle Needed)
-
-**Input**:  
-`tasks = ["A","A","B","B","C","C"]`  
-`n = 2`
-
-- Frequencies: A:2, B:2, C:2
-- `maxFreq = 2`
-- `countMaxFreq = 3` (A, B, C all appear 2 times)
-- `total_tasks = 6`
-
-Apply formula:
-
-```text
-(2 - 1) * (2 + 1) + 3 = 1 * 3 + 3 = 6
-max(6, 6) = 6
-```
-
-✅ Answer = 6
-
----
-
-### 🖼️ Schedule:
-
-We can do:
-
-```
-A B C A B C
-```
-
-Each task appears twice, separated by 2 other tasks → satisfies `n=2`.
-
-No idle needed! The **gaps are fully filled** by other tasks.
-
-So total time = 6.
-
-💡 This shows: when other tasks can **fill the gaps**, we don’t need idle time.
-
----
-
-### 🎯 Example 3: One Very Frequent Task
-
-**Input**:  
-`tasks = ["A","A","A","A","A","A","B","C","D","E"]`  
-`n = 2`
-
-- A:6, B:1, C:1, D:1, E:1
-- `maxFreq = 6` (A)
-- `countMaxFreq = 1` (only A has frequency 6)
-- `total_tasks = 10`
-
-Compute:
-
-```text
-(6 - 1) * (2 + 1) + 1 = 5 * 3 + 1 = 15 + 1 = 16
-max(16, 10) = 16
-```
-
-✅ Answer = 16
-
----
-
-### 🖼️ Why 16?
-
-We must schedule A like this:
-
-```
-A _ _ A _ _ A _ _ A _ _ A _ _ A
-```
-
-- 5 gaps between 6 A’s
-- Each gap is 3 units long (`n+1 = 3`)
-- Total so far: `5*3 + 1` (last A) → but wait, structure is:
-
-```
-[A _ _] [A _ _] [A _ _] [A _ _] [A _ _] [A]
-```
-
-→ 5 full blocks of size 3 → 15, plus last A → but it's already included.
-
-Actually, total length = `(maxFreq - 1) * (n + 1) + 1` = `5*3 + 1 = 16`
-
-Now, we can fill B, C, D, E into the gaps.
-
-Each gap has 2 empty slots → 5 gaps × 2 = 10 idle spots.
-
-We only have 5 other tasks → we can place them, but still have idle time.
-
-So minimum time is **16**, even though only 10 tasks.
-
-We **can’t compress** A’s schedule.
-
----
-
-### 🎯 Example 4: n = 0 (No Cooldown)
-
-**Input**:  
-`tasks = ["A","A","B","B"]`, `n = 0`
-
-- `maxFreq = 2`, `countMaxFreq = 2`, `total_tasks = 4`
-
-Formula:
-
-```text
-(2 - 1)*(0 + 1) + 2 = 1*1 + 2 = 3
-max(3, 4) = 4
-```
-
-✅ Answer = 4
-
----
-
-### 🖼️ Schedule: `A B A B` → no idle needed, `n=0` means no wait.
-
-So total time = 4 → matches.
-
-💡 This shows why we take `max(..., total_tasks)` — you can’t finish faster than the number of tasks.
-
----
-
-### 🎯 Example 5: All Same Task
-
-**Input**: `tasks = ["A","A","A"]`, `n = 1`
-
-- `maxFreq = 3`, `countMaxFreq = 1`, `total_tasks = 3`
-
-```text
-(3 - 1)*(1 + 1) + 1 = 2*2 + 1 = 5
-max(5, 3) = 5
-```
-
-✅ Answer = 5
-
----
-
-### 🖼️ Schedule:
-
-```
-A _ A _ A
-```
-
-Time: 1 (A), 2 (idle), 3 (A), 4 (idle), 5 (A)
-
-→ 5 units.
-
-Perfect.
-
----
-
-### 🔑 Key Insight Summary
-
-| Term | Meaning |
-|------|--------|
-| `(maxFreq - 1)` | Number of **full gaps** between the most frequent task |
-| `(n + 1)` | Each gap + task needs at least `n+1` time (1 for task, n for cooldown) |
-| `+ countMaxFreq` | The **last occurrence** of each max-frequency task goes at the end |
-| `max(..., total_tasks)` | Can't take less time than total number of tasks |
-
----
-
-### ✅ When Does Each Term Win?
-
-| Case | Which term wins? |
-|------|------------------|
-| Few unique tasks, high `n` | `(maxFreq-1)*(n+1)+...` → idle-heavy |
-| Many unique tasks | `total_tasks` → no idle, fully packed |
-| `n = 0` | Always `total_tasks` |
-| One dominant task | Formula term wins |
-
----
-
-### 🏁 Final Thoughts
-
-The **mathematical solution** works because:
-
-> 🔹 The **most frequent task** dictates the **minimum skeleton** of the schedule.  
-> 🔹 Other tasks either **fill the gaps** or extend the time.  
-> 🔹 If they fill everything, total tasks wins. Otherwise, the structure wins.
-
-You don’t need to simulate — just compute the **tightest possible schedule** around the bottleneck task.
-
----
-
-Let me know if you'd like a **diagram version** or a **whiteboard-style explanation**!
----
-
-### ⏱️ Complexity Analysis
-
-- **Time:** O(m), where `m = len(tasks)` — for counting frequencies.
-- **Space:** O(1) — since there are at most 26 unique tasks (uppercase letters), the `Counter` uses constant space.
-
----
-
-### 💡 Why Greedy Works?
-
-We always want to **schedule the most frequent tasks first** to avoid having them pile up at the end, which would require more idle time. By structuring around the most frequent task, we create a framework that minimizes idle slots.
-
-Even if we interleave other tasks optimally, the **bottleneck** is the most frequent task and its cooldown requirement.
-
----
-
-### ✅ Edge Cases
-
-- `n = 0`: No cooldown → answer is `len(tasks)`
-- All tasks are the same: `["A","A"], n=1` → `A idle A` → 3
-- Many distinct tasks: If `n=1`, tasks = [A,B,C,D,E], then no idle needed → answer = 5
-
----
-
-### 🔚 Conclusion
-
-The key insight is **not simulating** the schedule, but using **mathematical reasoning** to compute the minimum required time.
-
-> **Answer = max( (maxFreq - 1) * (n + 1) + countMaxFreq , total_tasks )**
-
-This elegant solution runs in linear time and is optimal.
-
----
-
-Let me know if you'd like a **simulation-based approach** (using heap or queue) as an alternative method!
-
+## 💡 Key Takeaways
+
+- The bottleneck is the **most frequent task**.
+- Use the formula: `(max_freq - 1) * (n + 1) + count_max_freq`
+- Only add idle time if needed — otherwise, use `len(tasks)`
 ---
 
 ## 5. [Top K Frequent Words](https://leetcode.com/problems/top-k-frequent-words/)
