@@ -881,184 +881,140 @@ Let me know if you'd like to see the **bucket sort** version (O(n) time) too!
 
 ## 6. [Find K Closest Elements](https://leetcode.com/problems/find-k-closest-elements/)
 
-### 📝 Problem Summary
-Given a sorted array and integer `k`, return the `k` closest elements to a target value `x`. Return them in ascending order.
+## 🧩 **Problem Statement**
 
-### 🔍 Pattern
-- **Binary Search on Answer** (find left boundary of result window)
-- **Two Pointers** (after finding start, expand outward)
-- Or: **Sliding Window** on sorted array
+Given a **sorted** integer array `arr`, two integers `k` and `x`, return the `k` closest integers to `x` in the array. The result should be **sorted in ascending order**.
 
-### ✅ Solution with Inline Comments
+> - "Closest" means smallest absolute difference: `|num - x|`
+> - If there’s a tie in distance, **choose the smaller number**
+
+---
+
+## 📥 **Sample Input / Output**
 
 ```python
-from typing import List
+Input: arr = [1, 2, 3, 4, 5], k = 4, x = 3
+Output: [1, 2, 3, 4]
 
-def findClosestElements(arr: List[int], k: int, x: int) -> List[int]:
-    # Use binary search to find the leftmost starting index of k elements
-    left, right = 0, len(arr) - k  # right is len-k because we need k elements
-    
-    while left < right:
-        mid = (left + right) // 2
+Explanation:
+|1-3|=2, |2-3|=1, |3-3|=0, |4-3|=1, |5-3|=2
+Closest 4: [1, 2, 3, 4] → distances [2,1,0,1]
+```
+
+Another example:
+```python
+Input: arr = [1, 3, 5, 7], k = 2, x = 4
+Output: [3, 5]
+
+Explanation:
+|1-4|=3, |3-4|=1, |5-4|=1, |7-4|=3
+Closest: 3 and 5 → [3,5] (both distance 1, but 3 < 5 so both included)
+```
+
+---
+
+## ✅ **Solution Code**
+
+```python
+class Solution:
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        left = 0
+        right = len(arr) - k  # last valid start index for window of size k
         
-        # Compare the distances from mid and mid+k to x
-        # If arr[mid] is farther than arr[mid+k], 
-        # then mid cannot be the left bound
-        # Because we'd get better elements by moving right
-        if x - arr[mid] > arr[mid + k] - x:
-            left = mid + 1
-        else:
-            right = mid
-    
-    # Now left is the starting index of the k closest elements
-    return arr[left:left + k]
-
-
-# ---- Official LeetCode Example ----
-if __name__ == "__main__":
-    # Example Input: arr = [1,2,3,4,5], k = 4, x = 3
-    arr = [1, 2, 3, 4, 5]
-    k = 4
-    x = 3
-    
-    # Call function
-    result = findClosestElements(arr, k, x)
-    
-    # Expected Output: [1,2,3,4]
-    # Distances: |1-3|=2, |2-3|=1, |3-3|=0, |4-3|=1, |5-3|=2
-    # Closest 4: 2,3,4,2 → but 1,2,3,4 are closer than 5
-    print("Output:", result)  # Output: [1, 2, 3, 4]
+        while left < right:
+            mid = (left + right) // 2
+            if x - arr[mid] > arr[mid + k] - x:
+                left = mid + 1
+            else:
+                right = mid
+        
+        return arr[left : left + k]
 ```
-
-### 🧪 Example Walkthrough
-
-### 📌 **Example Input**
-```python
-arr = [1, 2, 3, 4, 5]
-k = 4
-x = 3
-```
-
-We want the **4 closest elements** to `3`.
 
 ---
 
-### 🔍 **Step-by-Step Walkthrough**
+## 🔍 **Step-by-Step Explanation**
 
-#### Step 1: Initial Setup
-```python
-left = 0
-right = len(arr) - k = 5 - 4 = 1
-```
+### 🔎 Key Insight:
+> In a **sorted array**, the `k` closest elements to `x` will always form a **contiguous subarray**.
 
-So our binary search range is `[0, 1)` → only possible values for `left` are 0 or 1.
-
-We are trying to find the **starting index** of a subarray of length `k=4` that contains the closest elements to `x=3`.
-
-Possible windows:
-- Start at 0 → `[1,2,3,4]`
-- Start at 1 → `[2,3,4,5]`
-
-We’ll use binary search to pick the best one.
+So instead of computing all distances and sorting (which would be `O(n log n)`), we can:
+- Use **binary search** to find the best **starting index** of this window.
+- Return the slice of `k` elements starting from that index.
 
 ---
 
-#### 🔁 **Binary Search Loop**
+### 🧠 How Binary Search Works
 
-##### Iteration 1:
-```python
-left = 0, right = 1
-mid = (0 + 1) // 2 = 0
-```
+We are **not** searching for `x`, but for the **best starting position** of a window of size `k`.
+
+Let:
+- `mid` = current candidate start index
+- Window: `arr[mid]` to `arr[mid + k - 1]`
+- The next possible element (if we shift right): `arr[mid + k]`
 
 Now compare:
-- `x - arr[mid]` → distance from `x` to left end of window
-- `arr[mid + k] - x` → distance from `x` to right end of window
+- Distance from `x` to **left end**: `x - arr[mid]`
+- Distance from `x` to **next right element**: `arr[mid + k] - x`
 
-Why this comparison?  
-Because we’re comparing two overlapping windows:
-- One starting at `mid = 0`: `[1,2,3,4]`
-- One starting at `mid + 1 = 1`: `[2,3,4,5]`
-
-We decide which one is better by comparing the **outer edges**: `arr[mid]` vs `arr[mid + k]`.
-
-> If `arr[mid + k]` is closer to `x`, then we should move the window right → discard current `mid`.
-
-Let’s compute:
-
-```python
-x - arr[mid] = 3 - arr[0] = 3 - 1 = 2
-arr[mid + k] - x = arr[0 + 4] - 3 = arr[4] - 3 = 5 - 3 = 2
-```
-
-So:
-```python
-if 2 > 2 → False
-```
-
-So we go to `else`:
-```python
-right = mid = 0
-```
-
-Now `left = 0`, `right = 0` → loop ends.
-
----
-
-#### ✅ Final Result
-```python
-return arr[left : left + k] = arr[0:4] = [1, 2, 3, 4]
-```
-
----
-
-### 🎯 **Why [1,2,3,4] and not [2,3,4,5]?**
-
-Let’s compute distances to `x = 3`:
-
-| Element | Distance |
-|--------|----------|
-| 1      | |1-3| = 2 |
-| 2      | |2-3| = 1 |
-| 3      | |3-3| = 0 |
-| 4      | |4-3| = 1 |
-| 5      | |5-3| = 2 |
-
-Top 4 smallest distances: all except one of the 2s.
-
-But both `1` and `5` are equally distant from `3`. Since `1 < 5`, we prefer `1`. So we pick `[1,2,3,4]`.
-
-This matches our result.
-
----
-
-### 🔄 **Key Insight of the Algorithm**
-
-Instead of comparing individual elements, we compare **candidate windows** of size `k`.
-
-At each `mid`, we consider:
-- Window starting at `mid`: includes `arr[mid]` to `arr[mid + k - 1]`
-- The next window would start at `mid + 1`
-
-To decide whether to move right, we compare:
-- `x - arr[mid]` → how far the **leftmost element** of current window is from `x`
-- `arr[mid + k] - x` → how far the **next element after the window** is from `x`
-
-If the next element (`arr[mid+k]`) is **closer** than the current leftmost (`arr[mid]`), we should shift the window right.
-
-Hence:
+#### Decision Rule:
 ```python
 if x - arr[mid] > arr[mid + k] - x:
-    left = mid + 1   # shift window right
+    # Left end is farther → move window to the right
+    left = mid + 1
 else:
-    right = mid      # keep current left or go left
+    # Right end is not closer, or tie → prefer smaller numbers (stay left)
+    right = mid
 ```
 
-### ⏱️ Complexity
-- **Time**: O(log(n - k)) — binary search over `n - k` positions
-- **Space**: O(1) — only indices used
+> 💡 This handles ties naturally: when distances are equal, we keep the left window → includes smaller numbers.
 
 ---
+
+### 🚶‍♂️ Example Walkthrough
+
+```python
+arr = [1, 3, 5, 7], k = 2, x = 4
+```
+
+Possible windows of size 2:
+- Start 0 → `[1,3]`
+- Start 1 → `[3,5]`
+- Start 2 → `[5,7]`
+
+We binary search between `left = 0`, `right = 4 - 2 = 2`
+
+#### Iteration 1:
+- `mid = (0 + 2)//2 = 1`
+- `x - arr[1] = 4 - 3 = 1`
+- `arr[1+2] - x = arr[3] - 4 = 7 - 4 = 3`
+- Is `1 > 3`? ❌ → `right = mid = 1`
+
+#### Iteration 2:
+- `left = 0`, `right = 1`
+- `mid = (0 + 1)//2 = 0`
+- `x - arr[0] = 4 - 1 = 3`
+- `arr[0+2] - x = 5 - 4 = 1`
+- Is `3 > 1`? ✅ → `left = mid + 1 = 1`
+
+Now `left == right == 1` → exit loop
+
+Return `arr[1:1+2] = arr[1:3] = [3, 5]` ✅
+
+---
+
+## ⏱️ **Complexity Analysis**
+
+| Metric | Value | Reason |
+|-------|-------|--------|
+| **Time Complexity** | `O(log n + k)` | `O(log n)` for binary search, `O(k)` for slicing the result |
+| **Space Complexity** | `O(1)` | Only using constant extra space (no additional data structures) |
+
+> ✅ Note: Output array of size `k` is not counted in space complexity unless specified.
+
+---
+
+
 
 ## 7. [Kth Largest Element in an Array](https://leetcode.com/problems/kth-largest-element-in-an-array/)
 
