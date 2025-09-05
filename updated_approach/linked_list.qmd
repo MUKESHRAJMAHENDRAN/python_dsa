@@ -657,13 +657,20 @@ Which matches expected behavior.
 
 ### 3. [Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/)
 
-#### 📌 Summary
-Reverse a singly linked list.
+### 📌 1. **Summary**
+Reverse a singly linked list by changing the direction of the `next` pointers so that the last node becomes the first, and the original head becomes the tail.
 
-#### 🔗 Pattern(s)
-- Pointer Rewiring
+---
 
-#### ✅ Solution with Inline Comments
+### 🔗 2. **Pattern(s)**
+- **Pointer Rewiring** (Primary)
+- **Iterative Traversal with State Tracking**
+
+> This problem teaches how to safely reverse links without losing access to the rest of the list.
+
+---
+
+### ✅ 3. **Solution with Inline Comments**
 
 ```python
 class ListNode:
@@ -672,632 +679,289 @@ class ListNode:
         self.next = next
 
 def reverseList(head):
-    prev = None
-    curr = head
-    
-    # Traverse the list
-    while curr:
-        # Store next node before breaking link
-        nxt = curr.next
-        
-        # Reverse the link: curr → prev
-        curr.next = prev
-        
-        # Move prev and curr forward
-        prev = curr
-        curr = nxt
-    
-    # prev now points to the new head
-    return prev
+    """
+    Reverses a singly linked list iteratively.
+    Time: O(n), Space: O(1)
+    Returns new head of the reversed list.
+    """
+    prev = None   # Will become the new head at the end
+    curr = head   # Current node we are processing
 
+    while curr:  # Traverse until we reach the end
+        nxt = curr.next # 1:Save the next node (don't lose the rest!)
+        curr.next = prev # 2:Reverse the link (point backward)
+        prev = curr # 3:Move prev forward (curr becomes part of reversed part)
+        curr = nxt  # 4:Move curr to the next node
 
-# ---- Official LeetCode Example ----
-if __name__ == "__main__":
-    # Example Input: head = [1,2,3,4,5]
-    head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))
-    
-    # Call function
-    new_head = reverseList(head)
-    
-    # Output: [5,4,3,2,1]
-    result = []
-    while new_head:
-        result.append(new_head.val)
-        new_head = new_head.next
-    print("Output:", result)  # Output: [5, 4, 3, 2, 1]
-```
-
-Let's walk through the provided **LeetCode problem: Reverse Linked List** step by step using your example code.
-
----
-
-### 🔗 Problem Summary
-You are given a singly linked list and need to reverse it. The function `reverseList(head)` should return the new head of the reversed list.
-
----
-
-### 🧱 Data Structure: `ListNode`
-```python
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
-```
-Each node has:
-- `val`: the value stored.
-- `next`: pointer to the next node (or `None` if last).
-
----
-
-### ✅ Example Input
-```python
-head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))
-```
-
-This creates a linked list:
-```
-1 → 2 → 3 → 4 → 5 → None
-```
-
-We want to reverse it to:
-```
-5 → 4 → 3 → 2 → 1 → None
-```
-
----Let's walk through the provided **LeetCode problem: Reverse Linked List** step by step using your example code.
-
----
-
-### 🔗 Problem Summary
-You are given a singly linked list and need to reverse it. The function `reverseList(head)` should return the new head of the reversed list.
-
----
-
-### 🧱 Data Structure: `ListNode`
-```python
-class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
-```
-Each node has:
-- `val`: the value stored.
-- `next`: pointer to the next node (or `None` if last).
-
----
-
-### ✅ Example Input
-```python
-head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))
-```
-
-This creates a linked list:
-```
-1 → 2 → 3 → 4 → 5 → None
-```
-
-We want to reverse it to:
-```
-5 → 4 → 3 → 2 → 1 → None
+    return prev  # At the end, prev points to the last node → new head
 ```
 
 ---
 
-### 🔄 Function: `reverseList(head)`
-```python
-def reverseList(head):
-    prev = None
-    curr = head
-    
-    while curr:
-        nxt = curr.next
-        curr.next = prev
-        prev = curr
-        curr = nxt
-    
-    return prev
-```
+### 🧪 4. **Example Code Walkthrough (Easy & Visual)**
 
-Let’s go through this **step-by-step**, tracking `prev`, `curr`, and `nxt`.
+Let’s reverse: `1 → 2 → 3 → null`
 
----
+We’ll go **step by step**, showing what each pointer does.
 
-## 🔍 Step-by-Step Walkthrough
-
-### Initial State:
+#### Initial State:
 ```
 prev = None
-curr = 1 (head)
-nxt = not yet assigned
-```
-
-List looks like:
-```
-1 → 2 → 3 → 4 → 5 → None
+curr = 1 → 2 → 3 → null
 ```
 
 ---
 
-### 🟢 Iteration 1:
-- `nxt = curr.next` → `nxt = 2`
-- `curr.next = prev` → `1.next = None`  
-  Now: `1 → None`
-- `prev = curr` → `prev = 1`
-- `curr = nxt` → `curr = 2`
-
-Now:
-```
-prev = 1 → None
-curr = 2 → 3 → 4 → 5 → None
-```
-
----
-
-### 🟢 Iteration 2:
-- `nxt = curr.next` → `nxt = 3`
-- `curr.next = prev` → `2.next = 1`  
-  Now: `2 → 1 → None`
-- `prev = curr` → `prev = 2`
-- `curr = nxt` → `curr = 3`
-
-Now:
-```
-prev = 2 → 1 → None
-curr = 3 → 4 → 5 → None
-```
-
----
-
-### 🟢 Iteration 3:
-- `nxt = 3.next` → `nxt = 4`
-- `curr.next = prev` → `3.next = 2`  
-  Now: `3 → 2 → 1 → None`
-- `prev = curr` → `prev = 3`
-- `curr = nxt` → `curr = 4`
-
-Now:
-```
-prev = 3 → 2 → 1 → None
-curr = 4 → 5 → None
-```
-
----
-
-### 🟢 Iteration 4:
-- `nxt = 4.next` → `nxt = 5`
-- `curr.next = prev` → `4.next = 3`  
-  Now: `4 → 3 → 2 → 1 → None`
-- `prev = curr` → `prev = 4`
-- `curr = nxt` → `curr = 5`
-
-Now:
-```
-prev = 4 → 3 → 2 → 1 → None
-curr = 5 → None
-```
-
----
-
-### 🟢 Iteration 5:
-- `nxt = 5.next` → `nxt = None`
-- `curr.next = prev` → `5.next = 4`  
-  Now: `5 → 4 → 3 → 2 → 1 → None`
-- `prev = curr` → `prev = 5`
-- `curr = nxt` → `curr = None`
-
-Now loop ends because `curr` is `None`.
-
----
-
-### ✅ Final Result:
-Return `prev`, which is now pointing to **node 5** — the new head!
-
-```
-5 → 4 → 3 → 2 → 1 → None
-```
-
-✅ Success! The list is reversed.
-
----
-
-### 📤 Output Section (in main block):
+#### 🔁 **Step 1: Process Node 1**
 
 ```python
-new_head = reverseList(head)
-
-result = []
-while new_head:
-    result.append(new_head.val)
-    new_head = new_head.next
-print("Output:", result)  # Output: [5, 4, 3, 2, 1]
+nxt = curr.next   → nxt points to 2
+curr.next = prev  → 1 now points to None (reverse!)
+prev = curr       → prev moves to 1
+curr = nxt        → curr moves to 2
 ```
 
-- We traverse the reversed list starting from `new_head = 5`.
-- Append values: `5`, `4`, `3`, `2`, `1`.
-- Print: `[5, 4, 3, 2, 1]`
-
----
-
-### ✅ Key Points of Algorithm
-
-| Concept | Explanation |
-|-------|-------------|
-| **Three Pointers** | `prev`, `curr`, `nxt` keep track of nodes during reversal. |
-| **Break & Re-link** | `curr.next = prev` reverses direction. |
-| **Move Forward** | Update `prev = curr`, `curr = nxt`. |
-| **Time Complexity** | O(n): visit each node once. |
-| **Space Complexity** | O(1): only using constant extra space. |
-
----
-
-### 💡 Visual Summary (After Each Step)
-
+**After Step 1:**
 ```
-Initial:     1 → 2 → 3 → 4 → 5 → None
-Step 1:      1 ← 2 → 3 → 4 → 5 → None   (prev=1, curr=2)
-Step 2:      1 ← 2 ← 3 → 4 → 5 → None   (prev=2, curr=3)
-Step 3:      1 ← 2 ← 3 ← 4 → 5 → None   (prev=3, curr=4)
-Step 4:      1 ← 2 ← 3 ← 4 ← 5 → None   (prev=4, curr=5)
-Final:       5 ← 4 ← 3 ← 2 ← 1 → None   (return prev = 5)
+prev → 1 → None
+curr → 2 → 3 → null
+List so far: 1 is reversed; 2 and 3 still forward
 ```
 
 ---
 
-### ✅ Conclusion
-
-Your code is correct, efficient, and well-written. It uses the classic **iterative reversal technique** with three pointers, making it ideal for interviews and production use.
-
-> ✅ **Final Answer**: Output is `[5, 4, 3, 2, 1]` – the list has been successfully reversed!
-
-Let’s go through this **step-by-step**, tracking `prev`, `curr`, and `nxt`.
-
----
-
-## 🔍 Step-by-Step Walkthrough
-
-### Initial State:
-```
-prev = None
-curr = 1 (head)
-nxt = not yet assigned
-```
-
-List looks like:
-```
-1 → 2 → 3 → 4 → 5 → None
-```
-
----
-
-### 🟢 Iteration 1:
-- `nxt = curr.next` → `nxt = 2`
-- `curr.next = prev` → `1.next = None`  
-  Now: `1 → None`
-- `prev = curr` → `prev = 1`
-- `curr = nxt` → `curr = 2`
-
-Now:
-```
-prev = 1 → None
-curr = 2 → 3 → 4 → 5 → None
-```
-
----
-
-### 🟢 Iteration 2:
-- `nxt = curr.next` → `nxt = 3`
-- `curr.next = prev` → `2.next = 1`  
-  Now: `2 → 1 → None`
-- `prev = curr` → `prev = 2`
-- `curr = nxt` → `curr = 3`
-
-Now:
-```
-prev = 2 → 1 → None
-curr = 3 → 4 → 5 → None
-```
-
----
-
-### 🟢 Iteration 3:
-- `nxt = 3.next` → `nxt = 4`
-- `curr.next = prev` → `3.next = 2`  
-  Now: `3 → 2 → 1 → None`
-- `prev = curr` → `prev = 3`
-- `curr = nxt` → `curr = 4`
-
-Now:
-```
-prev = 3 → 2 → 1 → None
-curr = 4 → 5 → None
-```
-
----
-
-### 🟢 Iteration 4:
-- `nxt = 4.next` → `nxt = 5`
-- `curr.next = prev` → `4.next = 3`  
-  Now: `4 → 3 → 2 → 1 → None`
-- `prev = curr` → `prev = 4`
-- `curr = nxt` → `curr = 5`
-
-Now:
-```
-prev = 4 → 3 → 2 → 1 → None
-curr = 5 → None
-```
-
----
-
-### 🟢 Iteration 5:
-- `nxt = 5.next` → `nxt = None`
-- `curr.next = prev` → `5.next = 4`  
-  Now: `5 → 4 → 3 → 2 → 1 → None`
-- `prev = curr` → `prev = 5`
-- `curr = nxt` → `curr = None`
-
-Now loop ends because `curr` is `None`.
-
----
-
-### ✅ Final Result:
-Return `prev`, which is now pointing to **node 5** — the new head!
-
-```
-5 → 4 → 3 → 2 → 1 → None
-```
-
-✅ Success! The list is reversed.
-
----
-
-### 📤 Output Section (in main block):
+#### 🔁 **Step 2: Process Node 2**
 
 ```python
-new_head = reverseList(head)
-
-result = []
-while new_head:
-    result.append(new_head.val)
-    new_head = new_head.next
-print("Output:", result)  # Output: [5, 4, 3, 2, 1]
+nxt = curr.next   → nxt points to 3
+curr.next = prev  → 2 now points to 1
+prev = curr       → prev moves to 2
+curr = nxt        → curr moves to 3
 ```
 
-- We traverse the reversed list starting from `new_head = 5`.
-- Append values: `5`, `4`, `3`, `2`, `1`.
-- Print: `[5, 4, 3, 2, 1]`
-
----
-
-### ✅ Key Points of Algorithm
-
-| Concept | Explanation |
-|-------|-------------|
-| **Three Pointers** | `prev`, `curr`, `nxt` keep track of nodes during reversal. |
-| **Break & Re-link** | `curr.next = prev` reverses direction. |
-| **Move Forward** | Update `prev = curr`, `curr = nxt`. |
-| **Time Complexity** | O(n): visit each node once. |
-| **Space Complexity** | O(1): only using constant extra space. |
-
----
-
-### 💡 Visual Summary (After Each Step)
-
+**After Step 2:**
 ```
-Initial:     1 → 2 → 3 → 4 → 5 → None
-Step 1:      1 ← 2 → 3 → 4 → 5 → None   (prev=1, curr=2)
-Step 2:      1 ← 2 ← 3 → 4 → 5 → None   (prev=2, curr=3)
-Step 3:      1 ← 2 ← 3 ← 4 → 5 → None   (prev=3, curr=4)
-Step 4:      1 ← 2 ← 3 ← 4 ← 5 → None   (prev=4, curr=5)
-Final:       5 ← 4 ← 3 ← 2 ← 1 → None   (return prev = 5)
+prev → 2 → 1 → None
+curr → 3 → null
+List so far: 2→1 is reversed; 3 still forward
 ```
 
 ---
 
-### ✅ Conclusion
+#### 🔁 **Step 3: Process Node 3**
 
-> ✅ **Final Answer**: Output is `[5, 4, 3, 2, 1]` – the list has been successfully reversed!
+```python
+nxt = curr.next   → nxt = None (end of list)
+curr.next = prev  → 3 now points to 2
+prev = curr       → prev moves to 3
+curr = nxt        → curr = None → loop ends
+```
 
-#### ⏱️ Complexity
-- **Time:** O(n)
-- **Space:** O(1)
+**After Step 3:**
+```
+prev → 3 → 2 → 1 → null
+curr = None → exit loop
+```
+
+---
+
+#### 🏁 Final Result:
+```python
+return prev  → returns 3 (the new head)
+✅ List is reversed: 3 → 2 → 1 → null
+```
+
+---
+
+### ⏱️ 5. **Time and Space Complexity**
+
+| Metric | Value | Explanation |
+|-------|-------|-----------|
+| **Time Complexity** | O(n) | We visit each node exactly once |
+| **Space Complexity** | O(1) | Only use 3 variables (`prev`, `curr`, `nxt`) — no extra data structures |
+
+> ✅ This is optimal — can't do better than O(n) time or O(1) space.
+
+---
+
+### 🎯 Bonus: Interview Tips
+
+- **Say this aloud**:  
+  *"I’ll reverse the list by rewiring each node to point to its previous node, using three pointers to do it safely."*
+
+- **Clarify edge cases**:
+  - If `head is None` or `head.next is None`, return `head` — but our code already handles this naturally.
+
+- **Visualize as you code**:  
+  Draw `prev → curr → nxt` on paper or whiteboard.
+
+- **Mention the recursive version briefly** (if asked):
+  ```python
+  def reverseListRecursive(head):
+      if not head or not head.next:
+          return head
+      new_head = reverseListRecursive(head.next)
+      head.next.next = head
+      head.next = None
+      return new_head
+  ```
+  - Time: O(n), Space: O(n) due to call stack.
+
+- **Practice until muscle memory**:  
+  You should be able to write this in under 2 minutes — it's a warm-up question!
+
+---
+
+
 
 ### 4. [Middle of the Linked List](https://leetcode.com/problems/middle-of-the-linked-list/)
 
-#### 📌 Summary
-Find the middle node of a linked list. If even length, return the second middle.
+#### 🔷 **Problem Statement: Middle of the Linked List**
 
-#### 🔗 Pattern(s)
-- Fast/Slow Pointers
+Given the `head` of a singly-linked list, return **the middle node** of the linked list.
 
-#### ✅ Solution with Inline Comments
+If there are two middle nodes (even number of nodes), return **the second middle node**.
+
+---
+
+### ✅ **Sample Input & Output**
+
+**Example 1:**
+```
+Input:  [1, 2, 3, 4, 5]
+Output: Node with value 3
+Explanation: The middle node is 3.
+```
+
+**Example 2:**
+```
+Input:  [1, 2, 3, 4, 5, 6]
+Output: Node with value 4
+Explanation: There are two middle nodes: 3 and 4. Return the second one → 4.
+```
+
+---
+
+## 🧠 **Approach: Two Pointers (Slow and Fast)**
+
+We use the **"Tortoise and Hare"** technique:
+- `slow` pointer moves **1 step** at a time.
+- `fast` pointer moves **2 steps** at a time.
+- When `fast` reaches the end, `slow` will be at the middle.
+
+> Why does this work?  
+> By the time the fast pointer has gone the full length (`n`), the slow pointer has gone half (`n/2`).
+
+---
+
+## 💻 **Clean Code with Detailed Comments**
 
 ```python
+# Definition for a singly-linked list node
 class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val
         self.next = next
 
 def middleNode(head):
-    # Both pointers start at head
+    """
+    Find the middle node of a linked list using slow and fast pointers.
+    
+    Args:
+        head: ListNode - The head of the linked list
+    
+    Returns:
+        ListNode - The middle node of the list
+    """
+    # Initialize both pointers at the head
     slow = head
     fast = head
     
-    # Fast moves twice as fast
+    # Traverse: move slow by 1 step, fast by 2 steps
     while fast and fast.next:
-        slow = slow.next
-        fast = fast.next.next
+        slow = slow.next           # 1 step forward
+        fast = fast.next.next      # 2 steps forward
     
-    # When fast reaches end, slow is at middle
+    # When fast reaches the end, slow is at the middle
     return slow
+```
 
+---
 
-# ---- Official LeetCode Example ----
+## 🔍 **Example Walkthrough**
+
+### 🟢 Example 1: `[1 → 2 → 3 → 4 → 5]`
+
+| Step | slow (1 step) | fast (2 steps) | fast.next check |
+|------|---------------|----------------|-----------------|
+| 0    | 1             | 1              | Continue        |
+| 1    | 2             | 3              | Continue        |
+| 2    | 3             | 5              | fast.next = None → Stop |
+
+✅ Loop ends → `slow` is at **3** → Correct middle.
+
+---
+
+### 🟡 Example 2: `[1 → 2 → 3 → 4 → 5 → 6]`
+
+| Step | slow | fast | fast.next check |
+|------|------|------|------------------|
+| 0    | 1    | 1    | yes              |
+| 1    | 2    | 3    | yes              |
+| 2    | 3    | 5    | yes              |
+| 3    | 4    | None | Loop stops       |
+
+✅ `slow` ends at **4** → Second middle (as required) → Correct!
+
+---
+
+## ⏱️ **Time and Space Complexity**
+
+| Metric | Value | Explanation |
+|-------|-------|-------------|
+| **Time Complexity** | O(n) | We traverse the list once with the fast pointer. |
+| **Space Complexity** | O(1) | Only two pointers used — constant extra space. |
+
+> ✅ Optimal: No need to store values or traverse twice.
+
+---
+
+## 📌 **Key Takeaways for Interviews**
+
+1. **Two-pointer technique** is essential for linked list problems.
+2. This method avoids:
+   - Counting total nodes and looping again.
+   - Using extra memory (like storing nodes in an array).
+3. Handles **odd and even lengths** naturally.
+4. Always check `fast and fast.next` to avoid `None.next` error.
+5. Great pattern to know for:
+   - Finding cycles (Floyd’s Algorithm)
+   - Reversing second half of list
+   - Palindrome check in linked list
+
+---
+
+## ✅ **Bonus: How to Test It**
+
+```python
 if __name__ == "__main__":
-    # Example Input: head = [1,2,3,4,5]
-    head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))
-    
-    # Find middle
-    mid = middleNode(head)
-    print("Middle Value:", mid.val)  # Output: 3
+    # Test Case 1: [1,2,3,4,5] → Output: 3
+    head1 = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))
+    mid1 = middleNode(head1)
+    print("Middle Value:", mid1.val)  # Output: 3
 
-    # Example Input: head = [1,2,3,4,5,6]
-    head2 = ListNode(
-    1,
-    ListNode(
-        2,
-        ListNode(
-            3,
-            ListNode(
-                4,
-                ListNode(
-                    5,
-                    ListNode(6))))))
+    # Test Case 2: [1,2,3,4,5,6] → Output: 4
+    head2 = ListNode(1, 
+                ListNode(2, 
+                    ListNode(3, 
+                        ListNode(4, 
+                            ListNode(5, 
+                                ListNode(6))))))
     mid2 = middleNode(head2)
     print("Middle Value:", mid2.val)  # Output: 4
 ```
-
-Let's walk through the **example code** for finding the **middle node of a linked list** using the **"fast and slow pointer" technique**.
-
 ---
 
-### 🧠 **Problem Summary**
-Given a **non-empty** singly linked list, return the **middle node**.
-
-- If there are **even number of nodes**, return the **second middle** node.
-- Example:
-  - `[1,2,3,4,5]` → middle is `3`
-  - `[1,2,3,4,5,6]` → middle is `4`
-
----
-
-## ✅ **Algorithm: Fast & Slow Pointers**
-
-We use two pointers:
-- `slow`: moves one step at a time.
-- `fast`: moves two steps at a time.
-
-When `fast` reaches the end (or beyond), `slow` will be at the **middle**.
-
----
-
-### 🔍 Step-by-Step Walkthrough
-
-#### 🔹 Example 1: `head = [1,2,3,4,5]` (Odd length)
-
-```python
-head = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5)))))
-```
-
-Visual representation:
-```
-1 -> 2 -> 3 -> 4 -> 5
-↑         ↑
-slow      fast
-```
-
-Now run the loop:
-
-| Step | `slow` | `fast` | Action |
-|------|--------|--------|--------|
-| 0    | 1      | 1      | Start |
-| 1    | 2      | 3      | `slow.next`, `fast.next.next` |
-| 2    | 3      | 5      | `slow.next`, `fast.next.next` |
-| 3    | 4      | None   | `fast.next` is `None` → exit loop |
-
-> Loop condition: `while fast and fast.next`  
-> At this point, `fast.next` is `None`, so loop stops.
-
-✅ `slow` is now at **node with value 3** → correct middle!
-
-> Output: `Middle Value: 3`
-
----
-
-#### 🔹 Example 2: `head = [1,2,3,4,5,6]` (Even length)
-
-```python
-head2 = ListNode(1, ListNode(2, ListNode(3, ListNode(4, ListNode(5, ListNode(6))))))
-```
-
-Visual:
-```
-1 -> 2 -> 3 -> 4 -> 5 -> 6
-↑         ↑
-slow      fast
-```
-
-Loop iterations:
-
-| Step | `slow` | `fast` | Action |
-|------|--------|--------|--------|
-| 0    | 1      | 1      | Start |
-| 1    | 2      | 3      | Move both |
-| 2    | 3      | 5      | Move both |
-| 3    | 4      | None   | `fast.next` is `None` → stop |
-
-Now `slow` is at **node with value 4**
-
-> Why not 3? Because we want the **second middle** when even length — this is standard in LeetCode.
-
-✅ Output: `Middle Value: 4`
-
----
-
-### 📌 Key Insight
-
-- When `fast` reaches the end (`fast == None` or `fast.next == None`), `slow` is exactly at the middle.
-- For odd-length lists: one middle node.
-- For even-length lists: `slow` points to the **second** of the two middle nodes (due to `fast` moving faster).
-
-This works because:
-- In each iteration, `fast` moves twice as far as `slow`.
-- So by the time `fast` finishes, `slow` has gone half the distance → middle.
-
----
-
-### ⚙️ Code Logic Breakdown
-
-```python
-def middleNode(head):
-    slow = head
-    fast = head
-
-    while fast and fast.next:
-        slow = slow.next          # +1 step
-        fast = fast.next.next     # +2 steps
-
-    return slow
-```
-
-- `fast and fast.next`: ensures that `fast.next` exists before accessing it. Prevents `AttributeError`.
-- The loop continues until `fast` can't take another full jump (i.e., `fast.next` is `None`).
-- At that moment, `slow` is at the middle.
-
----
-
-### ✅ Time & Space Complexity
-
-- **Time**: O(n) — we traverse the list once.
-- **Space**: O(1) — only two pointers used.
-
----
-
-### 🎯 Why This Is Elegant
-
-No need to count total nodes or store values. It’s efficient, clean, and uses minimal memory.
-
----
-
-### 🏁 Final Notes
-
-This solution is **the standard optimal approach** for finding the middle of a linked list on LeetCode and other coding platforms.
-
-> ✔️ Works for both odd and even lengths  
-> ✔️ One pass, constant space  
-> ✔️ Clean and intuitive once you understand the "two-pointer" trick
-
----
 
 
 ### 5. [LRU Cache](https://leetcode.com/problems/lru-cache/)
