@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
 Pick **one sample input** and explain step-by-step:
 
-* More Elaborate code code walk through with output of each steps to understand better
+* More Elaborate code walk through with output of each steps to understand better
 * State before each key line
 * What does the line DO?
 * Why is it necessary? What breaks without it?

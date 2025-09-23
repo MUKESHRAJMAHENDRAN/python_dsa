@@ -12,7 +12,7 @@ For each problem I give you, generate a **standardized markdown note** in Quarto
 - **No separate test functions** — tests must run directly.  
 - **All outputs must be Quarto-friendly** with consistent markdown headers.  
 - **At least 3 test cases**: normal, edge, tricky/negative. 
-- **Code must fit within readable width**: wrap lines at ~60-62 characters.Use intermediate variables, split long expressions, and keep comments concise. 
+- **Code and Comment must fit within readable width**: wrap lines at ~55-60 characters.Use intermediate variables, split long expressions, and keep comments concise. 
 - Explanations must connect back to the **pattern** (teaching/mastery focus).  
 
 ---
@@ -81,14 +81,24 @@ if __name__ == "__main__":
 
 ### 🚶‍♂️ Example Walkthrough
 
-Pick **one sample input** and explain step-by-step:
+Step-by-Step Code Walkthrough with Output at Every Stage:
 
-* More Elaborate code code walk through with output of each steps to understand better
-* State before each key line
-* What does the line DO?
-* Why is it necessary? What breaks without it?
-* How it moves toward solution
-* Tie back to **pattern insight**
+* Please provide a detailed, beginner-friendly walkthrough of the following code. 
+* I want to understand exactly what happens at each step — line by line or even operation by operation.
+
+**Requirements:**
+1. Break the code into small, logical steps.
+2. For **each step**, show:
+   - What line or part of code is being executed.
+   - What variables are involved and their current values.
+   - What operation is taking place (e.g., assignment, comparison, loop iteration).
+   - The **output or effect** of that step (even if it’s just a variable update — show it!).
+3. Use simple, plain language — imagine you’re teaching someone brand new to programming.
+4. After each step, display the current “state” of the program (variable values, printed output, etc.).
+5. End with a summary of the final output and key takeaways.
+
+* Goal: I should be able to follow along like I’m watching the code run in slow motion — seeing every change and understanding why it happens.
+* Give nececessary spacing to read clearly after it rendering.
 
 ---
 
@@ -116,7 +126,7 @@ Pick **one sample input** and explain step-by-step:
 
 ### 🚀 FIRST TASK
 Start with:  
-**Problem**: *Two Sum*  
+**Problem**: * Subarray Sum Equals K*  
 **Pattern**: *Arrays & Hashing*
 ```
 
