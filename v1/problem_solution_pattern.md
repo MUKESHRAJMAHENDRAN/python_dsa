@@ -126,8 +126,8 @@ Step-by-Step Code Walkthrough with Output at Every Stage:
 
 ### 🚀 FIRST TASK
 Start with:  
-**Problem**: *Sliding Window Maximum*  
-**Pattern**: *Sliding Window*
+**Problem**: *minimum window substring*  
+**Pattern**: **
 ```
 
 ---
