@@ -126,8 +126,8 @@ Step-by-Step Code Walkthrough with Output at Every Stage:
 
 ### 🚀 FIRST TASK
 Start with:  
-**Problem**: * Subarray Sum Equals K*  
-**Pattern**: *Arrays & Hashing*
+**Problem**: *Rotate Array*  
+**Pattern**: *Two Pointers*
 ```
 
 ---
