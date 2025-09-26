@@ -126,9 +126,10 @@ Step-by-Step Code Walkthrough with Output at Every Stage:
 
 ### 🚀 FIRST TASK
 Start with:  
-**Problem**: *liding Window Maximum*  
+**Problem**: *Longest Common Prefix*  
 **Pattern**: **
 ```
 
 ---
+
 
