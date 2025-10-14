@@ -126,7 +126,7 @@ Step-by-Step Code Walkthrough with Output at Every Stage:
 
 ### 🚀 FIRST TASK
 Start with:  
-**Problem**: *Next Permutation*  
+**Problem**: *Binary Tree Right Side View*  
 **Pattern**: **
 ```
 
