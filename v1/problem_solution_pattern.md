@@ -126,10 +126,9 @@ Step-by-Step Code Walkthrough with Output at Every Stage:
 
 ### 🚀 FIRST TASK
 Start with:  
-**Problem**: *tring to Integer (atoi)*  
+**Problem**: *Next Permutation*  
 **Pattern**: **
 ```
 
 ---
-
 

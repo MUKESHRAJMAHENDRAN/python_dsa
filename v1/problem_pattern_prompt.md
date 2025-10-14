@@ -126,9 +126,17 @@ Step-by-Step Code Walkthrough with Output at Every Stage:
 
 ### 🚀 FIRST TASK
 Start with:  
-**Problem**: * Subarray Sum Equals K*  
+**Problem**: * https://leetcode.com/problems/valid-parentheses/*  
 **Pattern**: *Arrays & Hashing*
 ```
 
 ---
 
+
+
+Subsets
+Permutations
+Letter Combinations of a Phone Number
+Generate Parentheses
+N-Queens
+Next Permutation
