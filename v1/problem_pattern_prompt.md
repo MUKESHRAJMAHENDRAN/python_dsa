@@ -132,22 +132,12 @@ Start with:
 
 ---
 
-Same Tree
-Symmetric Tree
-Maximum Depth of Binary Tree
-Binary Tree Level Order Traversal
-Binary Tree Zigzag Level Order Traversal
-Binary Tree Right Side View
 
-Path Sum II
-Path Sum III
-Diameter of Binary Tree
-Binary Tree Maximum Path Sum
-Construct Binary Tree from Preorder and Inorder Traversal
-Serialize and Deserialize Binary Tree
-Subtree of Another Tree
-Balanced Binary Tree
-Lowest Common Ancestor of a Binary Tree
-All Nodes Distance K in Binary Tree
-Maximum Width of Binary Tree
-Invert Binary Tree
+Palindrome Number
+Reverse Integer
+Roman to Integer
+Pow(x, n)
+Random Pick with Weight
+
+
+
