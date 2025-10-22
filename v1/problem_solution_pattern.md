@@ -126,9 +126,52 @@ Step-by-Step Code Walkthrough with Output at Every Stage:
 
 ### 🚀 FIRST TASK
 Start with:  
-**Problem**: *Random Pick with Weight*  
+**Problem**: **  
 **Pattern**: **
 ```
 
 ---
 
+# Function to find all pairs in the array that sum up to a target value
+def pair(array):
+    # Define the target sum
+    target = 10
+    
+    # Initialize two pointers
+    left = 0  # Start pointer at the beginning of the array
+    right = len(array) - 1  # End pointer at the last element of the array
+    
+    # List to store the resulting pairs
+    output = []
+    
+    # Iterate until the two pointers meet
+    while left < right:
+        # Calculate the sum of the elements at the two pointers
+        current_sum = array[left] + array[right]
+        
+        # If the sum matches the target, add the pair to the output
+        if current_sum == target:
+            output.append((array[left], array[right]))
+            # Move both pointers inward
+            left += 1
+            right -= 1
+        # If the sum is less than the target, move the left pointer
+        # to increase the sum
+        elif current_sum < target:
+            left += 1
+        # If the sum is greater than the target, move the right pointer
+        # to decrease the sum
+        else:
+            right -= 1
+    
+    # Return the list of pairs
+    return output
+
+# Input array
+array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# Call the function and store the result
+result = pair(array)
+
+# Print the result
+print(result)  # Expected Output: [(1, 9), (2, 8), (3, 7), (4, 6)]
